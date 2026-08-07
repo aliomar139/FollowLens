@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">FollowLens</string>
-    <string name="login_title">Log in to Instagram</string>
-    <string name="login_captured">Session captured</string>
     <string name="channel_scan_results">Scan results</string>
+
+    <string name="session_title">Add your session key</string>
+    <string name="session_help">On a computer where you are already logged in to Instagram, open DevTools (F12) → Application → Cookies → https://www.instagram.com, and copy the value of the <b>sessionid</b> cookie. Paste it below.\n\nNo password is entered here. Using an existing session avoids the new-device login check.</string>
+    <string name="session_hint">sessionid value, or the whole cookie header</string>
+    <string name="session_save">Save session</string>
+    <string name="session_saved">Session saved</string>
+    <string name="session_invalid">That does not look like a session key. It should start with your numeric user id followed by a colon.</string>
+    <string name="session_privacy">Stored encrypted on this device only. Never uploaded, never logged.</string>
+
     <string name="refresh">Refresh</string>
     <string name="changes">Changes</string>
     <string name="not_following_back">Not following you back</string>

@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.kira.followlens.R;
-import com.kira.followlens.auth.LoginActivity;
+import com.kira.followlens.auth.SessionActivity;
 import com.kira.followlens.auth.SessionStore;
 import com.kira.followlens.data.EdgeEntity;
 import com.kira.followlens.data.FollowLensDao;
@@ -44,7 +44,8 @@ public class DashboardActivity extends AppCompatActivity {
 
         sessionStore = new SessionStore(this);
         if (!sessionStore.hasSession()) {
-            startActivity(new Intent(this, LoginActivity.class));
+            startActivity(new Intent(this, SessionActivity.class));
+            finish();
             return;
         }
 

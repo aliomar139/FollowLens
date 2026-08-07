@@ -20,9 +20,9 @@
         </activity>
 
         <activity
-            android:name=".auth.LoginActivity"
+            android:name=".auth.SessionActivity"
             android:exported="false"
-            android:label="@string/login_title" />
+            android:label="@string/session_title" />
 
         <activity
             android:name=".ui.ChangesActivity"
