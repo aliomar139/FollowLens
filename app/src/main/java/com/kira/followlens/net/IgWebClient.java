@@ -1,9 +1,9 @@
 package com.kira.followlens.net;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -40,7 +40,6 @@ public class IgWebClient {
     private final double jitterSeconds;
     private final OkHttpClient http;
     private final Random random = new Random();
-    private final Gson gson = new Gson();
 
     /**
      * @param baseUrl       normally https://www.instagram.com/, injectable so
@@ -111,7 +110,7 @@ public class IgWebClient {
                             + response.code()
                             + "; aborting so a partial list is not stored as a full one.");
                 }
-                body = gson.fromJson(response.body().string(), JsonObject.class);
+                body = asJsonObject(response.body().string(), kind, uid);
             }
 
             JsonArray users = body.getAsJsonArray("users");
@@ -129,6 +128,31 @@ public class IgWebClient {
             maxId = next.getAsString();
             pause();
         }
+    }
+
+    /**
+     * Parses a friendship page body, or fails as a fetch error.
+     *
+     * A 200 is not a promise of JSON. A throttled or challenged session gets an
+     * HTML page or a bare string with a 200 status, and Gson signals that with an
+     * unchecked JsonSyntaxException — which would sail past every caller's
+     * catch clause and kill the worker instead of being retried.
+     */
+    private JsonObject asJsonObject(String raw, String kind, String uid) throws IgException {
+        JsonElement parsed;
+        try {
+            parsed = JsonParser.parseString(raw);
+        } catch (RuntimeException e) {
+            throw new IgException.Fetch(kind + " page for " + uid
+                    + " returned a 200 that is not valid JSON (" + e.getClass().getSimpleName()
+                    + "); treating it as a failed page rather than an empty list.");
+        }
+        if (parsed == null || !parsed.isJsonObject()) {
+            throw new IgException.Fetch(kind + " page for " + uid
+                    + " returned a 200 that is not a JSON object; the session is most likely"
+                    + " being throttled or challenged.");
+        }
+        return parsed.getAsJsonObject();
     }
 
     /** GET with up to two backoff retries on HTTP 429. */

@@ -127,6 +127,31 @@ public class IgWebClientTest {
     }
 
     @Test
+    public void throwsFetchWhenA200BodyIsNotJson() {
+        // Instagram answers a throttled or challenged session with HTTP 200 and
+        // a body that is not the expected object. Observed on a real device
+        // when a second scan started right after one finished.
+        server.enqueue(new MockResponse().setResponseCode(200)
+                .setBody("<!DOCTYPE html><html><body>login</body></html>"));
+
+        assertThrows(IgException.Fetch.class, () -> client.following("999"));
+    }
+
+    @Test
+    public void throwsFetchWhenA200BodyIsAJsonPrimitive() {
+        server.enqueue(new MockResponse().setResponseCode(200).setBody("\"rate limited\""));
+
+        assertThrows(IgException.Fetch.class, () -> client.following("999"));
+    }
+
+    @Test
+    public void throwsFetchWhenA200BodyIsEmpty() {
+        server.enqueue(new MockResponse().setResponseCode(200).setBody(""));
+
+        assertThrows(IgException.Fetch.class, () -> client.following("999"));
+    }
+
+    @Test
     public void abortsOnNon200SoAPartialListIsNeverReturned() {
         server.enqueue(page("cursor1", "1", "alice"));
         server.enqueue(new MockResponse().setResponseCode(500));

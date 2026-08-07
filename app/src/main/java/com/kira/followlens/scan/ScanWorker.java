@@ -42,8 +42,16 @@ public class ScanWorker extends Worker {
                 sessionId -> new IgWebClient(INSTAGRAM, sessionId, Sleeper.REAL,
                         ScanService.DELAY_SECONDS, ScanService.JITTER_SECONDS));
 
-        ScanOutcome outcome = service.run(sessionStore.sessionId(),
-                getInputData().getBoolean(KEY_FORCE, false));
+        ScanOutcome outcome;
+        try {
+            outcome = service.run(sessionStore.sessionId(),
+                    getInputData().getBoolean(KEY_FORCE, false));
+        } catch (RuntimeException e) {
+            // A crashed worker is worse than a retried one: WorkManager marks the
+            // periodic chain FAILURE and stops scanning until the app is opened
+            // again. Nothing is written unless a scan commits, so retrying is safe.
+            return Result.retry();
+        }
 
         new ScanNotifier(context).notifyScan(outcome);
 
