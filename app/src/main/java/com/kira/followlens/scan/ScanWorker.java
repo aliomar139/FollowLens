@@ -11,6 +11,7 @@ import com.kira.followlens.data.FollowLensDatabase;
 import com.kira.followlens.data.ScanRepository;
 import com.kira.followlens.net.IgWebClient;
 import com.kira.followlens.net.Sleeper;
+import com.kira.followlens.notify.ScanNotifier;
 
 import okhttp3.HttpUrl;
 
@@ -43,6 +44,8 @@ public class ScanWorker extends Worker {
 
         ScanOutcome outcome = service.run(sessionStore.sessionId(),
                 getInputData().getBoolean(KEY_FORCE, false));
+
+        new ScanNotifier(context).notifyScan(outcome);
 
         if (outcome.ok()) {
             return Result.success();
