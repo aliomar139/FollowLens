@@ -11,13 +11,23 @@
         android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
 
         <activity
+            android:name=".ui.DashboardActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
             android:name=".auth.LoginActivity"
             android:exported="false"
             android:label="@string/login_title" />
 
         <activity
             android:name=".ui.ChangesActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:label="@string/changes" />
 
     </application>
 

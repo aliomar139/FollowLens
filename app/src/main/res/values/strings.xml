@@ -4,4 +4,10 @@
     <string name="login_title">Log in to Instagram</string>
     <string name="login_captured">Session captured</string>
     <string name="channel_scan_results">Scan results</string>
+    <string name="refresh">Refresh</string>
+    <string name="changes">Changes</string>
+    <string name="not_following_back">Not following you back</string>
+    <string name="no_scan_yet">No scan yet. Tap Refresh.</string>
+    <string name="counts_format">%1$d followers · %2$d following</string>
+    <string name="last_scan_format">Last scan: %1$s</string>
 </resources>
