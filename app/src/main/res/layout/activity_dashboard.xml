@@ -39,12 +39,11 @@
             android:text="@string/changes" />
     </LinearLayout>
 
-    <TextView
+    <Spinner
+        android:id="@+id/list_selector"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="16dp"
-        android:text="@string/not_following_back"
-        android:textStyle="bold" />
+        android:layout_marginTop="16dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"

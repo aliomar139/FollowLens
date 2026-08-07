@@ -10,4 +10,8 @@
     <string name="no_scan_yet">No scan yet. Tap Refresh.</string>
     <string name="counts_format">%1$d followers · %2$d following</string>
     <string name="last_scan_format">Last scan: %1$s</string>
+    <string name="followers">Followers</string>
+    <string name="following">Following</string>
+    <string name="mutuals">Mutuals</string>
+    <string name="fans">Fans (you don\'t follow back)</string>
 </resources>
