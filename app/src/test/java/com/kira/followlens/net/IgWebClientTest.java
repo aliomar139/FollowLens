@@ -127,6 +127,21 @@ public class IgWebClientTest {
     }
 
     @Test
+    public void reportsARedirectAsRateLimitingRatherThanFollowingIt() {
+        // Instagram soft-blocks an over-queried endpoint by 302-ing to the web
+        // homepage. Followed, that becomes a 200 full of HTML and looks like a
+        // parse bug; unfollowed, it is recognisable as throttling.
+        server.enqueue(new MockResponse().setResponseCode(302)
+                .setHeader("Location", "https://www.instagram.com/"));
+
+        IgException thrown = assertThrows(IgException.RateLimited.class,
+                () -> client.followers("999", 3));
+        assertTrue(thrown.getMessage().contains("redirected"));
+        // Exactly one request: the redirect must not be chased.
+        assertEquals(1, server.getRequestCount());
+    }
+
+    @Test
     public void throwsFetchWhenA200BodyIsNotJson() {
         // Instagram answers a throttled or challenged session with HTTP 200 and
         // a body that is not the expected object. Observed on a real device

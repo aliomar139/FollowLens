@@ -27,12 +27,14 @@ public final class ScanStatus {
         if (queued) {
             return ScanState.QUEUED;
         }
-        if (!hasScan) {
-            // Nothing has ever succeeded; that is more useful than the error text.
-            return ScanState.NO_SCAN;
-        }
+        // A stored error outranks "no scan yet": when the first scan has failed,
+        // the reason is the whole story. Telling someone to tap Refresh when
+        // Refresh is what just failed is the least useful thing the app can say.
         if (lastError != null && !lastError.trim().isEmpty()) {
             return ScanState.FAILED;
+        }
+        if (!hasScan) {
+            return ScanState.NO_SCAN;
         }
         return baselineOnly ? ScanState.BASELINE : ScanState.OK;
     }

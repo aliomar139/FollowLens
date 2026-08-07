@@ -27,10 +27,11 @@ public class ScanStatusTest {
     }
 
     @Test
-    public void noScanYetTakesPrecedenceOverAStoredError() {
-        // Nothing has ever succeeded, so "no scan yet" is the more useful message.
-        assertEquals(ScanState.NO_SCAN,
-                ScanStatus.of(false, false, false, false, "boom"));
+    public void aFailedFirstScanReportsTheErrorNotNoScanYet() {
+        // Verified on device: saying "No scan yet, tap Refresh" right after
+        // Refresh failed hides the only information that matters.
+        assertEquals(ScanState.FAILED,
+                ScanStatus.of(false, false, false, false, "throttled on this endpoint"));
     }
 
     @Test

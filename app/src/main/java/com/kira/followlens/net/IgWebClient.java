@@ -59,6 +59,11 @@ public class IgWebClient {
                 + "; ds_user_id=" + SessionId.userIdOf(sessionId);
         this.http = new OkHttpClient.Builder()
                 .callTimeout(30, TimeUnit.SECONDS)
+                // Redirects are never legitimate for these JSON endpoints. Following
+                // one turns Instagram's "no" into a 200 full of HTML, which then
+                // looks like a parse bug instead of a throttled request.
+                .followRedirects(false)
+                .followSslRedirects(false)
                 .build();
     }
 
@@ -199,6 +204,19 @@ public class IgWebClient {
                 response.close();
                 throw new IgException.SessionExpired(
                         "Session invalid or expired (401). Log in again.");
+            }
+            if (response.code() >= 300 && response.code() < 400) {
+                String location = response.header("Location");
+                response.close();
+                // Verified against the same session from Python: the followers
+                // endpoint 302s to the homepage while following still returns
+                // JSON. That is a per-endpoint soft block, not a broken request.
+                throw new IgException.RateLimited(
+                        "Instagram redirected this request to "
+                                + (location == null ? "another page" : location)
+                                + " instead of returning data. The session is being"
+                                + " throttled on this endpoint — wait and try again"
+                                + " later, or scan less often.");
             }
             return response;
         }
