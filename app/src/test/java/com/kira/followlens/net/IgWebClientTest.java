@@ -22,7 +22,10 @@ public class IgWebClientTest {
     public void setUp() throws Exception {
         server = new MockWebServer();
         server.start();
-        client = new IgWebClient(server.url("/"), "12345:secret:99", Sleeper.NONE, 0, 0);
+        // A csrftoken is supplied so tests exercise the steady state; the
+        // bootstrap path has its own tests below.
+        client = new IgWebClient(server.url("/"), "12345:secret:99", "Tok123",
+                Sleeper.NONE, 0, 0);
     }
 
     @After
@@ -73,6 +76,63 @@ public class IgWebClientTest {
         assertTrue(request.getHeader("user-agent").contains("Mozilla/5.0"));
         assertTrue(request.getHeader("cookie").contains("sessionid=12345:secret:99"));
         assertTrue(request.getHeader("cookie").contains("ds_user_id=12345"));
+        assertEquals("same-origin", request.getHeader("sec-fetch-site"));
+    }
+
+    @Test
+    public void sendsTheCsrfTokenAsBothCookieAndHeader() throws Exception {
+        server.enqueue(page(null, "1", "alice"));
+
+        client.following("999");
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("Tok123", request.getHeader("x-csrftoken"));
+        assertTrue(request.getHeader("cookie").contains("csrftoken=Tok123"));
+    }
+
+    @Test
+    public void bootstrapsACsrfTokenWhenTheSessionDidNotCarryOne() throws Exception {
+        // Root request that hands back a csrftoken, then the real page.
+        server.enqueue(new MockResponse().setResponseCode(200)
+                .setHeader("set-cookie", "csrftoken=FromRoot; Path=/; Secure")
+                .setBody("<html></html>"));
+        server.enqueue(page(null, "1", "alice"));
+
+        IgWebClient bare = new IgWebClient(server.url("/"), "12345:secret:99", null,
+                Sleeper.NONE, 0, 0);
+        bare.following("999");
+
+        server.takeRequest();                                  // the bootstrap call
+        RecordedRequest apiCall = server.takeRequest();
+        assertEquals("FromRoot", apiCall.getHeader("x-csrftoken"));
+    }
+
+    @Test
+    public void aFailedBootstrapDoesNotFailTheScan() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(500));   // bootstrap fails
+        server.enqueue(page(null, "1", "alice"));
+
+        IgWebClient bare = new IgWebClient(server.url("/"), "12345:secret:99", null,
+                Sleeper.NONE, 0, 0);
+
+        assertEquals(1, bare.following("999").size());
+    }
+
+    @Test
+    public void bootstrapsOnlyOnceAcrossManyPages() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(200)
+                .setHeader("set-cookie", "csrftoken=FromRoot; Path=/")
+                .setBody("<html></html>"));
+        server.enqueue(page("cursor1", "1", "alice"));
+        server.enqueue(page(null, "2", "bob"));
+
+        IgWebClient bare = new IgWebClient(server.url("/"), "12345:secret:99", null,
+                Sleeper.NONE, 0, 0);
+        bare.following("999");
+
+        // 1 bootstrap + 2 pages. A bootstrap per page would double the traffic
+        // against an endpoint that is already rate-limit sensitive.
+        assertEquals(3, server.getRequestCount());
     }
 
     @Test

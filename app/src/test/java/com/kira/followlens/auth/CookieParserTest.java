@@ -39,4 +39,16 @@ public class CookieParserTest {
     public void returnsNullForAnEmptySessionIdValue() {
         assertNull(CookieParser.sessionIdFrom("sessionid=; csrftoken=abc"));
     }
+
+    @Test
+    public void extractsTheCsrfTokenToo() {
+        String header = "csrftoken=Xy9Tok; sessionid=12345:secret:99; ds_user_id=12345";
+
+        assertEquals("Xy9Tok", CookieParser.csrfTokenFrom(header));
+    }
+
+    @Test
+    public void csrfTokenIsNullWhenOnlyASessionIdWasPasted() {
+        assertNull(CookieParser.csrfTokenFrom("sessionid=12345:secret:99"));
+    }
 }

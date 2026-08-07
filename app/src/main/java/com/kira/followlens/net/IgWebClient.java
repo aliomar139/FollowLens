@@ -34,7 +34,10 @@ public class IgWebClient {
     private static final int FOLLOWERS_PAGE_SIZE = 100;
 
     private final HttpUrl baseUrl;
-    private final String cookieHeader;
+    private final String sessionId;
+    private final String userId;
+    private String csrfToken;
+    private boolean csrfBootstrapAttempted;
     private final Sleeper sleeper;
     private final double delaySeconds;
     private final double jitterSeconds;
@@ -51,12 +54,23 @@ public class IgWebClient {
      */
     public IgWebClient(HttpUrl baseUrl, String sessionId, Sleeper sleeper,
                        double delaySeconds, double jitterSeconds) {
+        this(baseUrl, sessionId, null, sleeper, delaySeconds, jitterSeconds);
+    }
+
+    /**
+     * @param csrfToken the {@code csrftoken} cookie, when the pasted session
+     *                  included one. A browser always sends it next to sessionid;
+     *                  null means bootstrap one on first use.
+     */
+    public IgWebClient(HttpUrl baseUrl, String sessionId, String csrfToken, Sleeper sleeper,
+                       double delaySeconds, double jitterSeconds) {
         this.baseUrl = baseUrl;
         this.sleeper = sleeper;
         this.delaySeconds = delaySeconds;
         this.jitterSeconds = jitterSeconds;
-        this.cookieHeader = "sessionid=" + sessionId
-                + "; ds_user_id=" + SessionId.userIdOf(sessionId);
+        this.sessionId = sessionId;
+        this.userId = SessionId.userIdOf(sessionId);
+        this.csrfToken = csrfToken == null || csrfToken.trim().isEmpty() ? null : csrfToken.trim();
         this.http = new OkHttpClient.Builder()
                 .callTimeout(30, TimeUnit.SECONDS)
                 // Redirects are never legitimate for these JSON endpoints. Following
@@ -175,10 +189,63 @@ public class IgWebClient {
         return flat.length() <= 120 ? flat : flat.substring(0, 120) + "…";
     }
 
+    /** The cookie header a browser would send for these endpoints. */
+    private String cookieHeader() {
+        StringBuilder cookies = new StringBuilder("sessionid=").append(sessionId)
+                .append("; ds_user_id=").append(userId);
+        if (csrfToken != null) {
+            cookies.append("; csrftoken=").append(csrfToken);
+        }
+        return cookies.toString();
+    }
+
+    /**
+     * Fetches a csrftoken from the site root when the pasted session did not
+     * carry one. Done once, best-effort: the endpoints have been observed to
+     * answer without it, so a failure here must not fail the scan.
+     */
+    private void bootstrapCsrfTokenOnce() {
+        if (csrfToken != null || csrfBootstrapAttempted) {
+            return;
+        }
+        csrfBootstrapAttempted = true;
+        Request request = new Request.Builder()
+                .url(baseUrl)
+                .header("user-agent", USER_AGENT)
+                .header("accept-language", "en-US,en;q=0.9")
+                .header("cookie", cookieHeader())
+                .build();
+        try (Response response = http.newCall(request).execute()) {
+            for (String setCookie : response.headers("set-cookie")) {
+                String token = firstCookieValue(setCookie, "csrftoken");
+                if (token != null) {
+                    csrfToken = token;
+                    return;
+                }
+            }
+        } catch (IOException | RuntimeException e) {
+            // Best effort only; carry on without the token.
+        }
+    }
+
+    private static String firstCookieValue(String setCookieHeader, String name) {
+        String prefix = name + "=";
+        for (String part : setCookieHeader.split(";")) {
+            String candidate = part.trim();
+            if (candidate.startsWith(prefix)) {
+                String value = candidate.substring(prefix.length()).trim();
+                return value.isEmpty() ? null : value;
+            }
+        }
+        return null;
+    }
+
     /** GET with up to two backoff retries on HTTP 429. */
     private Response get(HttpUrl url) throws IgException, IOException {
+        bootstrapCsrfTokenOnce();
+
         for (int attempt = 0; attempt < 3; attempt++) {
-            Response response = http.newCall(new Request.Builder()
+            Request.Builder builder = new Request.Builder()
                     .url(url)
                     .header("x-ig-app-id", APP_ID)
                     .header("x-asbd-id", "129477")
@@ -188,8 +255,17 @@ public class IgWebClient {
                     .header("accept", "*/*")
                     .header("accept-language", "en-US,en;q=0.9")
                     .header("referer", "https://www.instagram.com/")
-                    .header("cookie", cookieHeader)
-                    .build()).execute();
+                    // The web app sends these on every XHR; without them the
+                    // request is distinguishable from a real browser call.
+                    .header("sec-fetch-site", "same-origin")
+                    .header("sec-fetch-mode", "cors")
+                    .header("sec-fetch-dest", "empty")
+                    .header("cookie", cookieHeader());
+            if (csrfToken != null) {
+                builder.header("x-csrftoken", csrfToken);
+            }
+
+            Response response = http.newCall(builder.build()).execute();
 
             if (response.code() == 429) {
                 response.close();

@@ -46,7 +46,8 @@ public class ScanWorker extends Worker {
                 new ScanRepository(FollowLensDatabase.get(context)),
                 ScanPrefs.of(context),
                 Clock.SYSTEM,
-                sessionId -> new IgWebClient(INSTAGRAM, sessionId, Sleeper.REAL,
+                sessionId -> new IgWebClient(INSTAGRAM, sessionId,
+                        sessionStore.csrfToken(), Sleeper.REAL,
                         ScanService.DELAY_SECONDS, ScanService.JITTER_SECONDS));
 
         boolean userInitiated = getInputData().getBoolean(KEY_FORCE, false);

@@ -42,14 +42,19 @@ public class SessionActivity extends AppCompatActivity {
     }
 
     private void save() {
-        String normalized = SessionInput.normalize(input.getText().toString());
+        String pasted = input.getText().toString();
+        String normalized = SessionInput.normalize(pasted);
         if (normalized == null) {
             showError(getString(R.string.session_invalid));
             return;
         }
 
+        // If a whole cookie header was pasted it also carries the csrftoken,
+        // which the API expects alongside the session.
+        String csrfToken = CookieParser.csrfTokenFrom(pasted);
+
         try {
-            sessionStore.save(normalized);
+            sessionStore.save(normalized, csrfToken);
         } catch (IllegalArgumentException e) {
             // Defensive: normalize() already rejects this shape.
             showError(getString(R.string.session_invalid));

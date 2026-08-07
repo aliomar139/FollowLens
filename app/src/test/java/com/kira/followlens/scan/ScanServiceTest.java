@@ -80,8 +80,11 @@ public class ScanServiceTest {
         repository = new ScanRepository(db);
         prefs = new FakePrefs();
         clock = new MutableClock();
+        // A csrftoken is supplied so the client does not spend a request
+        // bootstrapping one, which would consume a queued page response here.
         service = new ScanService(repository, prefs, clock,
-                sessionId -> new IgWebClient(server.url("/"), sessionId, Sleeper.NONE, 0, 0));
+                sessionId -> new IgWebClient(server.url("/"), sessionId, "Tok123",
+                        Sleeper.NONE, 0, 0));
     }
 
     @After
