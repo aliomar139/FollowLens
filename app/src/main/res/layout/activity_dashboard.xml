@@ -148,8 +148,18 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
             android:layout_weight="1"
             android:text="@string/changes"
+            style="@style/Button.Secondary" />
+
+        <Button
+            android:id="@+id/view_history"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:text="@string/history"
             style="@style/Button.Secondary" />
 
     </LinearLayout>
@@ -179,6 +189,26 @@
         android:paddingStart="14dp"
         android:paddingEnd="14dp"
         android:popupBackground="@color/surface_raised" />
+
+    <EditText
+        android:id="@+id/search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_input"
+        android:hint="@string/search_hint"
+        android:imeOptions="actionSearch"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        android:maxLines="1"
+        android:minHeight="48dp"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:textColor="@color/text_primary"
+        android:textColorHint="@color/text_disabled"
+        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/list_count"

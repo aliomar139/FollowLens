@@ -37,4 +37,16 @@
 
     <color name="ripple">#33E11D48</color>
 
+    <!--
+      Monogram tints. Held in the red-through-violet neighbourhood so avatars
+      read as part of the crimson theme rather than a random rainbow, and kept
+      dark enough that white letters stay legible on top.
+    -->
+    <color name="tint_1">#FF7F1D2E</color>
+    <color name="tint_2">#FF8C2F1B</color>
+    <color name="tint_3">#FF6D2144</color>
+    <color name="tint_4">#FF5B2A6B</color>
+    <color name="tint_5">#FF7A3410</color>
+    <color name="tint_6">#FF4C2338</color>
+
 </resources>

@@ -36,4 +36,24 @@
     <string name="list_count_format">%1$d accounts</string>
     <string name="changes_empty_title">No changes recorded yet</string>
     <string name="changes_empty_body">The first scan is a baseline. Follows and unfollows show up here after the next one.</string>
+    <string name="changes_empty_filtered">Nothing matches this filter</string>
+
+    <!-- Search and filters -->
+    <string name="search_hint">Search username</string>
+    <string name="list_empty_search">No account matching “%1$s” in this list.</string>
+    <string name="filter_all">All</string>
+    <string name="filter_new">New</string>
+    <string name="filter_lost">Lost</string>
+
+    <!-- Rows -->
+    <string name="badge_mutual">MUTUAL</string>
+    <string name="no_browser">No app available to open Instagram.</string>
+
+    <!-- History -->
+    <string name="history">History</string>
+    <string name="history_scans">Scans</string>
+    <string name="history_counts_format">%1$d / %2$d</string>
+    <string name="history_empty">No scans yet. Run a scan and the trend will build up here.</string>
+    <string name="history_single_scan">One scan so far — the trend needs at least two.</string>
+    <string name="history_range_format">%1$d scans · %2$s to %3$s</string>
 </resources>

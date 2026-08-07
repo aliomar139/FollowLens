@@ -29,6 +29,11 @@
             android:exported="false"
             android:label="@string/changes" />
 
+        <activity
+            android:name=".ui.HistoryActivity"
+            android:exported="false"
+            android:label="@string/history" />
+
     </application>
 
 </manifest>

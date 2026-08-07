@@ -5,10 +5,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -24,7 +27,7 @@ import androidx.work.WorkInfo;
 import com.kira.followlens.R;
 import com.kira.followlens.auth.SessionActivity;
 import com.kira.followlens.auth.SessionStore;
-import com.kira.followlens.data.EdgeEntity;
+import com.kira.followlens.data.EdgeRow;
 import com.kira.followlens.data.FollowLensDao;
 import com.kira.followlens.data.FollowLensDatabase;
 import com.kira.followlens.data.ScanEntity;
@@ -52,6 +55,9 @@ public class DashboardActivity extends AppCompatActivity {
     private TextView listEmpty;
     private ProgressBar progress;
     private Button refresh;
+    private EditText search;
+    private EdgeAdapter listAdapter;
+    private List<EdgeRow> loadedRows;
 
     // Latest known values, combined into one status line by render().
     private boolean scanRunning;
@@ -147,7 +153,7 @@ public class DashboardActivity extends AppCompatActivity {
         selector.setSelection(ListView.NOT_FOLLOWING_BACK.ordinal());
 
         selector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            private LiveData<List<EdgeEntity>> current;
+            private LiveData<List<EdgeRow>> current;
 
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -157,9 +163,9 @@ public class DashboardActivity extends AppCompatActivity {
                     current.removeObservers(DashboardActivity.this);
                 }
                 current = views[position].query(dao, accountId);
-                current.observe(DashboardActivity.this, edges -> {
-                    adapter.submit(edges);
-                    showListState(edges == null ? 0 : edges.size());
+                current.observe(DashboardActivity.this, rows -> {
+                    loadedRows = rows;
+                    applyFilter();
                 });
             }
 
@@ -167,12 +173,47 @@ public class DashboardActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+
+        listAdapter = adapter;
+        search = findViewById(R.id.search);
+        search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                applyFilter();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
     }
 
-    private void showListState(int count) {
+    /** Re-applies the search box to whichever list is currently loaded. */
+    private void applyFilter() {
+        if (listAdapter == null) {
+            return;
+        }
+        String query = search == null ? "" : search.getText().toString();
+        List<EdgeRow> visible = AccountFilter.matching(loadedRows, query);
+        listAdapter.submit(visible);
+        showListState(visible.size(), query);
+    }
+
+    private void showListState(int count, String query) {
         listCount.setText(getString(R.string.list_count_format, count));
         if (count > 0) {
             listEmpty.setVisibility(View.GONE);
+            return;
+        }
+        // A search that matched nothing is a different situation from a list that
+        // is genuinely empty, and saying so avoids "the app lost my followers".
+        if (query != null && !query.trim().isEmpty()) {
+            listEmpty.setText(getString(R.string.list_empty_search, query.trim()));
+            listEmpty.setVisibility(View.VISIBLE);
             return;
         }
         listEmpty.setText(latestScan == null
@@ -191,6 +232,9 @@ public class DashboardActivity extends AppCompatActivity {
 
         findViewById(R.id.view_changes).setOnClickListener(v ->
                 startActivity(new Intent(this, ChangesActivity.class)));
+
+        findViewById(R.id.view_history).setOnClickListener(v ->
+                startActivity(new Intent(this, HistoryActivity.class)));
     }
 
     private void observeScanProgress() {

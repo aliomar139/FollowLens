@@ -4,7 +4,7 @@ import androidx.annotation.StringRes;
 import androidx.lifecycle.LiveData;
 
 import com.kira.followlens.R;
-import com.kira.followlens.data.EdgeEntity;
+import com.kira.followlens.data.EdgeRow;
 import com.kira.followlens.data.FollowLensDao;
 import com.kira.followlens.data.ListKind;
 
@@ -30,7 +30,7 @@ public enum ListView {
         return labelRes;
     }
 
-    public LiveData<List<EdgeEntity>> query(FollowLensDao dao, String accountId) {
+    public LiveData<List<EdgeRow>> query(FollowLensDao dao, String accountId) {
         switch (this) {
             case FOLLOWERS:
                 return dao.edges(accountId, ListKind.FOLLOWER);
