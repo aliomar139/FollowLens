@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.kira.followlens.R;
@@ -28,12 +29,15 @@ public class ChangeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     /** Package-visible and static so it can be unit tested without a View. */
     static String labelFor(ChangeEventEntity event) {
         boolean added = event.direction == ChangeDirection.ADDED;
-        String sign = added ? "+ " : "- ";
         if (event.kind == ListKind.FOLLOWER) {
-            return sign + event.username + (added ? " started following you" : " unfollowed you");
+            return event.username + (added ? " started following you" : " unfollowed you");
         }
-        return sign + "you " + (added ? "started following " : "stopped following ")
-                + event.username;
+        return "you " + (added ? "started following " : "stopped following ") + event.username;
+    }
+
+    /** The glyph, not the colour, is what conveys direction. */
+    static String signFor(ChangeEventEntity event) {
+        return event.direction == ChangeDirection.ADDED ? "+" : "−";
     }
 
     public void submit(List<ChangeEventEntity> events) {
@@ -66,7 +70,14 @@ public class ChangeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                             .format(new Date(item.occurredAt())));
             return;
         }
-        ((ChangeHolder) holder).label.setText(labelFor(item.change()));
+        ChangeHolder changeHolder = (ChangeHolder) holder;
+        ChangeEventEntity event = item.change();
+        changeHolder.label.setText(labelFor(event));
+        changeHolder.sign.setText(signFor(event));
+        changeHolder.sign.setTextColor(ContextCompat.getColor(
+                changeHolder.itemView.getContext(),
+                event.direction == ChangeDirection.ADDED
+                        ? R.color.positive : R.color.negative));
     }
 
     @Override
@@ -85,10 +96,12 @@ public class ChangeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     static class ChangeHolder extends RecyclerView.ViewHolder {
         final TextView label;
+        final TextView sign;
 
         ChangeHolder(View view) {
             super(view);
             label = view.findViewById(R.id.label);
+            sign = view.findViewById(R.id.sign);
         }
     }
 }

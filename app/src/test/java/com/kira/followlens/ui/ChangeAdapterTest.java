@@ -21,25 +21,33 @@ public class ChangeAdapterTest {
 
     @Test
     public void labelsANewFollower() {
-        assertEquals("+ alice started following you",
+        assertEquals("alice started following you",
                 ChangeAdapter.labelFor(change(ChangeDirection.ADDED, ListKind.FOLLOWER, "alice")));
     }
 
     @Test
     public void labelsAnUnfollow() {
-        assertEquals("- bob unfollowed you",
+        assertEquals("bob unfollowed you",
                 ChangeAdapter.labelFor(change(ChangeDirection.REMOVED, ListKind.FOLLOWER, "bob")));
     }
 
     @Test
     public void labelsAccountsYouStartedFollowing() {
-        assertEquals("+ you started following carol",
+        assertEquals("you started following carol",
                 ChangeAdapter.labelFor(change(ChangeDirection.ADDED, ListKind.FOLLOWING, "carol")));
     }
 
     @Test
     public void labelsAccountsYouStoppedFollowing() {
-        assertEquals("- you stopped following dave",
+        assertEquals("you stopped following dave",
                 ChangeAdapter.labelFor(change(ChangeDirection.REMOVED, ListKind.FOLLOWING, "dave")));
+    }
+
+    @Test
+    public void signIsAGlyphSoMeaningDoesNotRestOnColourAlone() {
+        assertEquals("+",
+                ChangeAdapter.signFor(change(ChangeDirection.ADDED, ListKind.FOLLOWER, "alice")));
+        assertEquals("−",
+                ChangeAdapter.signFor(change(ChangeDirection.REMOVED, ListKind.FOLLOWER, "bob")));
     }
 }

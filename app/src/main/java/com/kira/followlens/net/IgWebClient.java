@@ -145,14 +145,29 @@ public class IgWebClient {
         } catch (RuntimeException e) {
             throw new IgException.Fetch(kind + " page for " + uid
                     + " returned a 200 that is not valid JSON (" + e.getClass().getSimpleName()
-                    + "); treating it as a failed page rather than an empty list.");
+                    + "); body starts: " + snippet(raw));
         }
         if (parsed == null || !parsed.isJsonObject()) {
             throw new IgException.Fetch(kind + " page for " + uid
                     + " returned a 200 that is not a JSON object; the session is most likely"
-                    + " being throttled or challenged.");
+                    + " being throttled or challenged. Body starts: " + snippet(raw));
         }
         return parsed.getAsJsonObject();
+    }
+
+    /**
+     * A short, single-line prefix of an unexpected body.
+     *
+     * Enough to tell an HTML challenge page apart from a JSON error envelope,
+     * which is the difference between "wait it out" and "the request is wrong".
+     * Deliberately short so a surprise body cannot dump account data into a log.
+     */
+    private static String snippet(String raw) {
+        if (raw == null || raw.isEmpty()) {
+            return "<empty>";
+        }
+        String flat = raw.replaceAll("\\s+", " ").trim();
+        return flat.length() <= 120 ? flat : flat.substring(0, 120) + "…";
     }
 
     /** GET with up to two backoff retries on HTTP 429. */

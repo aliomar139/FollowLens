@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Focus ring is 2dp accent: visible focus is required, not optional. -->
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/surface_raised" />
+            <stroke android:width="2dp" android:color="@color/accent" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/surface_raised" />
+            <stroke android:width="1dp" android:color="@color/border" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+</selector>

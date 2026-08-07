@@ -2,9 +2,11 @@
 <resources>
     <string name="app_name">FollowLens</string>
     <string name="channel_scan_results">Scan results</string>
+    <string name="at_sign">@</string>
+    <string name="dash_placeholder">—</string>
 
     <string name="session_title">Add your session key</string>
-    <string name="session_help">On a computer where you are already logged in to Instagram, open DevTools (F12) → Application → Cookies → https://www.instagram.com, and copy the value of the <b>sessionid</b> cookie. Paste it below.\n\nNo password is entered here. Using an existing session avoids the new-device login check.</string>
+    <string name="session_help">On a computer where you are already logged in to Instagram, open DevTools (F12) → Application → Cookies → https://www.instagram.com, and copy the value of the sessionid cookie. Paste it below.\n\nNo password is entered here. Reusing an existing session avoids the new-device login check.</string>
     <string name="session_hint">sessionid value, or the whole cookie header</string>
     <string name="session_save">Save session</string>
     <string name="session_saved">Session saved</string>
@@ -12,13 +14,26 @@
     <string name="session_privacy">Stored encrypted on this device only. Never uploaded, never logged.</string>
 
     <string name="refresh">Refresh</string>
+    <string name="refresh_running">Scanning…</string>
     <string name="changes">Changes</string>
-    <string name="not_following_back">Not following you back</string>
-    <string name="no_scan_yet">No scan yet. Tap Refresh.</string>
-    <string name="counts_format">%1$d followers · %2$d following</string>
-    <string name="last_scan_format">Last scan: %1$s</string>
+    <string name="not_following_back">Not following back</string>
     <string name="followers">Followers</string>
     <string name="following">Following</string>
     <string name="mutuals">Mutuals</string>
-    <string name="fans">Fans (you don\'t follow back)</string>
+    <string name="fans">Fans</string>
+
+    <!-- Status line -->
+    <string name="status_no_scan">No scan yet. Tap Refresh to take the first snapshot.</string>
+    <string name="status_scanning">Scanning Instagram… this takes up to a minute.</string>
+    <string name="status_last_scan">Last scan %1$s</string>
+    <string name="status_baseline">Baseline saved %1$s. Changes appear after the next scan.</string>
+    <string name="status_failed">Last scan failed: %1$s</string>
+    <string name="status_queued">Scan queued…</string>
+
+    <!-- Empty states -->
+    <string name="list_empty_no_scan">Nothing here yet — run a scan first.</string>
+    <string name="list_empty_none">No accounts in this list.</string>
+    <string name="list_count_format">%1$d accounts</string>
+    <string name="changes_empty_title">No changes recorded yet</string>
+    <string name="changes_empty_body">The first scan is a baseline. Follows and unfollows show up here after the next one.</string>
 </resources>
