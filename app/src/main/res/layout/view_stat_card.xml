@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Contents of one stat tile. The label sits above the number, because a tile is
+  read top-down: you need to know what you are looking at before the value means
+  anything. Label-under works in a table, where the column header already said it.
+-->
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:id="@+id/stat_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Text.StatLabel" />
+
+    <TextView
+        android:id="@+id/stat_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/dash_placeholder"
+        style="@style/Text.Stat" />
+
+    <!--
+      Hidden until there is a previous scan to compare against. A "0" here would
+      claim nothing changed, which is a different statement from not knowing.
+    -->
+    <TextView
+        android:id="@+id/stat_delta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFeatureSettings="tnum"
+        android:paddingStart="7dp"
+        android:paddingTop="3dp"
+        android:paddingEnd="7dp"
+        android:paddingBottom="3dp"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+</merge>

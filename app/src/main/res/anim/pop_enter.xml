@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Exactly push_exit reversed: the layer underneath comes back the way it went. -->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@interpolator/decel_soft">
+    <translate
+        android:duration="300"
+        android:fromXDelta="-24%p"
+        android:toXDelta="0" />
+    <alpha
+        android:duration="300"
+        android:fromAlpha="0.55"
+        android:toAlpha="1" />
+</set>

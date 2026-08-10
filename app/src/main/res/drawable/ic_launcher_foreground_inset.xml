@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The supplied foreground fills its whole 108dp square, wordmark and all, but an
+  adaptive icon only guarantees the middle 66dp: every launcher crops the rest
+  to its own shape, and a circular mask would cut "followlens" clean off.
+
+  Insetting by 17dp a side pulls the artwork to roughly 74dp, which survives the
+  circle and the squircle both. It costs some size on screen, and the real fix
+  is a foreground exported without the wordmark, drawn to the safe zone.
+-->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@mipmap/ic_launcher_foreground"
+    android:insetBottom="17dp"
+    android:insetLeft="17dp"
+    android:insetRight="17dp"
+    android:insetTop="17dp" />

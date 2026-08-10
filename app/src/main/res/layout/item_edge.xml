@@ -2,12 +2,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="6dp"
+    android:layout_marginTop="8dp"
     android:background="@drawable/bg_row"
     android:clickable="true"
     android:focusable="true"
     android:gravity="center_vertical"
-    android:minHeight="56dp"
+    android:minHeight="64dp"
     android:orientation="horizontal"
     android:paddingStart="12dp"
     android:paddingTop="10dp"
@@ -17,13 +17,15 @@
     <!-- Monogram stands in for a profile picture. No network request per row. -->
     <TextView
         android:id="@+id/monogram"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_marginEnd="12dp"
         android:background="@drawable/bg_monogram"
         android:gravity="center"
+        android:includeFontPadding="false"
+        android:letterSpacing="-0.02"
         android:textColor="@color/text_primary"
-        android:textSize="15sp"
+        android:textSize="16sp"
         android:textStyle="bold" />
 
     <TextView
@@ -33,22 +35,56 @@
         android:layout_weight="1"
         android:ellipsize="end"
         android:maxLines="1"
-        style="@style/Text.Body" />
+        style="@style/Text.BodyStrong" />
 
-    <!-- Text label, not a coloured dot: the badge must be readable on its own. -->
+    <!--
+      Two badges, ranked. NEW is filled and leads because it is the thing that
+      changed; MUTUAL is neutral and follows because it is a standing fact. Both
+      are words, not coloured dots, so neither depends on seeing colour.
+    -->
+    <TextView
+        android:id="@+id/badge_new"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/bg_badge_new"
+        android:letterSpacing="0.06"
+        android:paddingStart="9dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="9dp"
+        android:paddingBottom="4dp"
+        android:text="@string/badge_new"
+        android:textColor="@color/on_accent"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
     <TextView
         android:id="@+id/badge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="6dp"
         android:background="@drawable/bg_badge"
-        android:paddingStart="8dp"
-        android:paddingTop="3dp"
-        android:paddingEnd="8dp"
-        android:paddingBottom="3dp"
-        android:textColor="@color/accent"
-        android:textSize="11sp"
+        android:letterSpacing="0.06"
+        android:paddingStart="9dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="9dp"
+        android:paddingBottom="4dp"
+        android:textColor="@color/text_secondary"
+        android:textSize="10sp"
         android:textStyle="bold"
         android:visibility="gone" />
+
+    <!--
+      Tapping a row leaves for Instagram. Saying so with the leaving-the-app
+      glyph is cheaper than an explanation, and it means the jump out of the app
+      is never a surprise.
+    -->
+    <ImageView
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:layout_marginStart="10dp"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_open" />
 
 </LinearLayout>

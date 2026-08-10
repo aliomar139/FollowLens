@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A popover, not a full screen. It is anchored to the top-right because that is
+  where the button that opens it lives: the panel grows out of its trigger, so
+  the relationship between the two is visible rather than remembered.
+
+  The scrim behind it dims the dashboard instead of replacing it. This is a
+  short modal task, and keeping its context on screen is what makes closing it
+  feel like stepping back rather than navigating.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrim"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/scrim"
+    android:clickable="true"
+    android:focusable="true"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:id="@+id/sheet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_card_hero"
+        android:orientation="vertical"
+        android:paddingStart="18dp"
+        android:paddingTop="20dp"
+        android:paddingEnd="18dp"
+        android:paddingBottom="14dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!--
+              A glyph rather than a letter: this app only ever learns the
+              account's numeric id, and an initial of "1" identifies nothing.
+              The disc behind it is tinted from that id, so the colour is at
+              least stable per account.
+            -->
+            <ImageView
+                android:id="@+id/account_avatar"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="14dp"
+                android:background="@drawable/bg_monogram"
+                android:contentDescription="@null"
+                android:padding="12dp"
+                android:src="@drawable/ic_account" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/account_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="middle"
+                    android:maxLines="1"
+                    style="@style/Text.Headline" />
+
+                <TextView
+                    android:id="@+id/account_session"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:fontFamily="monospace"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    style="@style/Text.Footnote" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!--
+          Facts about this account, one per line, label and value on the same
+          row. Two columns read faster than a paragraph and make a missing value
+          obvious instead of invisible.
+        -->
+        <LinearLayout
+            android:id="@+id/account_facts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:orientation="vertical" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="14dp"
+            android:background="@color/hairline" />
+
+        <!--
+          Switching sessions is the ordinary action and sits first. Signing out
+          is separated below it, in the warning colour, because it is the one
+          that takes something away.
+        -->
+        <TextView
+            android:id="@+id/switch_session"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:drawableStart="@drawable/ic_switch_session"
+            android:drawablePadding="14dp"
+            android:gravity="center_vertical"
+            android:minHeight="52dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:text="@string/account_switch"
+            style="@style/Text.Body" />
+
+        <TextView
+            android:id="@+id/sign_out"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:drawableStart="@drawable/ic_sign_out"
+            android:drawablePadding="14dp"
+            android:gravity="center_vertical"
+            android:minHeight="52dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:text="@string/account_sign_out"
+            android:textColor="@color/negative"
+            style="@style/Text.Body" />
+
+    </LinearLayout>
+
+</FrameLayout>

@@ -1,36 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+  Same object, same appearance: a change is an account, so it is drawn like one.
+  This row used to be a glyph and a sentence while the account lists showed a
+  monogram, a name and badges, and the two read as parts of different apps.
+
+  The name leads and the action follows underneath, because the name is what you
+  are scanning the list for; "started following you" is the answer to a question
+  you only ask once you have found the row.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="6dp"
+    android:layout_marginTop="8dp"
     android:background="@drawable/bg_card"
-    android:gravity="center_vertical"
-    android:minHeight="48dp"
-    android:orientation="horizontal"
-    android:paddingStart="14dp"
-    android:paddingTop="12dp"
+    android:minHeight="64dp"
+    android:paddingStart="12dp"
+    android:paddingTop="10dp"
     android:paddingEnd="14dp"
-    android:paddingBottom="12dp">
+    android:paddingBottom="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/monogram"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_monogram"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:letterSpacing="-0.02"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/username"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                style="@style/Text.BodyStrong" />
+
+            <TextView
+                android:id="@+id/label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                style="@style/Text.Caption" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
     <!--
-      The +/- glyph carries the meaning, the colour only reinforces it. A
-      colour-blind user, or anyone on a washed-out screen, still reads the sign.
+      The direction glyph overlaps the monogram's corner, the way a status dot
+      does on an avatar. Sitting on the monogram rather than beside it ties the
+      sign to the person it describes, and keeps the name's left edge aligned
+      with every other list in the app.
     -->
     <TextView
         android:id="@+id/sign"
-        android:layout_width="22dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="10dp"
-        android:fontFamily="monospace"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_gravity="start|bottom"
+        android:layout_marginStart="26dp"
+        android:background="@drawable/bg_disc_ringed"
         android:gravity="center"
-        android:textSize="17sp"
+        android:includeFontPadding="false"
+        android:textSize="12sp"
         android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/label"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        style="@style/Text.Body" />
-
-</LinearLayout>
+</FrameLayout>

@@ -4,27 +4,60 @@
   hex, so the palette can change in one place.
 
   Palette: "cinema dark + play red" — true black for OLED, crimson for action.
+
+  Surfaces are ordered by depth, not by lightness alone. Each step up is both
+  slightly lighter and slightly warmer, which is what makes a stack of panels
+  read as layers of one material rather than as unrelated grey rectangles.
 -->
 <resources>
 
-    <!-- Surfaces, darkest to lightest -->
+    <!-- Surfaces, deepest to nearest -->
     <color name="bg">#FF000000</color>
-    <color name="surface">#FF0C0C0D</color>
-    <color name="surface_raised">#FF141416</color>
-    <color name="surface_muted">#FF181818</color>
-    <color name="border">#FF262629</color>
+    <color name="surface">#FF0D0D10</color>
+    <color name="surface_raised">#FF16161A</color>
+    <color name="surface_muted">#FF1D1D22</color>
+    <color name="surface_high">#FF242429</color>
+
+    <!--
+      Two borders, because one weight cannot do both jobs. The hairline is the
+      quiet edge that gives a panel a boundary without drawing a line the eye
+      has to step over; `border` is for edges that must actually be read.
+    -->
+    <color name="hairline">#14FFFFFF</color>
+    <color name="border">#FF2A2A30</color>
+
+    <!--
+      A material catches light on its top edge. A one-pixel bright line there is
+      what separates "a panel floating above the page" from "a lighter rectangle
+      painted on it", and it costs nothing.
+    -->
+    <color name="edge_light">#1AFFFFFF</color>
+
+    <!--
+      Chrome that content scrolls beneath. Real backdrop blur needs API 31 and
+      this app ships to 26, so the honest approximation is a near-opaque layer
+      of the base colour plus the light top edge above — translucent enough to
+      belong to the page, solid enough that text underneath never shows through.
+    -->
+    <color name="chrome">#F2000000</color>
+    <color name="chrome_fade">#00000000</color>
+
+    <!-- Modal dimming: pushes the layer behind back rather than hiding it. -->
+    <color name="scrim">#99000000</color>
 
     <!-- Text -->
-    <color name="text_primary">#FFF8FAFC</color>
-    <color name="text_secondary">#FF94A3B8</color>
+    <color name="text_primary">#FFF7F8FA</color>
+    <color name="text_secondary">#FF9AA3B2</color>
     <color name="text_disabled">#FF5A6472</color>
 
     <!-- Brand accent: actions and emphasis -->
     <color name="accent">#FFE11D48</color>
+    <color name="accent_bright">#FFF43F5E</color>
     <color name="accent_pressed">#FFBE123C</color>
     <color name="accent_disabled">#FF4A1220</color>
     <color name="on_accent">#FFFFFFFF</color>
     <color name="accent_dim">#22E11D48</color>
+    <color name="accent_wash">#0DE11D48</color>
 
     <!--
       Status colours. The brand accent is already red, so failures must NOT also
@@ -32,10 +65,14 @@
       every status is paired with a glyph so meaning never rests on colour alone.
     -->
     <color name="positive">#FF22C55E</color>
+    <color name="positive_dim">#1F22C55E</color>
     <color name="warning">#FFF59E0B</color>
+    <color name="warning_dim">#1FF59E0B</color>
     <color name="negative">#FFFB7185</color>
+    <color name="negative_dim">#1FFB7185</color>
 
     <color name="ripple">#33E11D48</color>
+    <color name="ripple_neutral">#1FFFFFFF</color>
 
     <!--
       Monogram tints. Held in the red-through-violet neighbourhood so avatars

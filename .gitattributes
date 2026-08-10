@@ -1,0 +1,16 @@
+# Normalize to LF in the repository, regardless of the contributor's platform.
+* text=auto eol=lf
+
+# The Gradle wrapper script is executed by /bin/sh on the CI runner; CRLF would
+# make it unrunnable there. Windows batch files need the opposite.
+gradlew     text eol=lf
+*.sh        text eol=lf
+*.bat       text eol=crlf
+
+# Binary — never touch.
+*.png       binary
+*.jpg       binary
+*.webp      binary
+*.jar       binary
+*.keystore  binary
+*.jks       binary

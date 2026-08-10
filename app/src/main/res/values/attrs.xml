@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="StatCard">
+        <!-- What the number measures. Set in XML so the layout still reads as
+             three named tiles rather than three anonymous boxes wired up later. -->
+        <attr name="statLabel" format="string" />
+    </declare-styleable>
+</resources>

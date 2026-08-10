@@ -70,6 +70,16 @@ public class ScanServiceTest {
                 .setBody("{\"users\":[" + users + "],\"next_max_id\":null}"));
     }
 
+    /**
+     * The reported follower total, which the scan asks for between the two list
+     * walks. When it matches what the first pass found, the second pass — the
+     * expensive half of a scan — is skipped entirely.
+     */
+    private void enqueueFollowerCount(int count) {
+        server.enqueue(new MockResponse().setResponseCode(200)
+                .setBody("{\"user\":{\"follower_count\":" + count + "}}"));
+    }
+
     @Before
     public void setUp() throws Exception {
         server = new MockWebServer();
@@ -96,8 +106,8 @@ public class ScanServiceTest {
     @Test
     public void firstScanCommitsAsBaselineWithNoReportedChanges() {
         enqueueList("1", "alice");   // following
-        enqueueList("2", "bob");     // followers, pass 1
-        enqueueList("2", "bob");     // followers, pass 2 adds nothing
+        enqueueFollowerCount(1);     // one follower reported…
+        enqueueList("2", "bob");     // …and pass 1 found it, so no second pass
 
         ScanOutcome outcome = service.run(SESSION, false);
 
@@ -105,18 +115,37 @@ public class ScanServiceTest {
         assertTrue(outcome.baseline());
         assertEquals(0, outcome.addedFollowers());
         assertEquals(0, outcome.removedFollowers());
+        assertEquals(3, server.getRequestCount());
+    }
+
+    /**
+     * Without a reported total the fetch cannot know pass one was complete, so
+     * it proves it the old way. This is the fallback, and it has to keep
+     * working: the count request is allowed to fail for any reason.
+     */
+    @Test
+    public void scanStillWorksWhenTheFollowerCountCannotBeRead() {
+        enqueueList("1", "alice");
+        server.enqueue(new MockResponse().setResponseCode(429));   // count unavailable
+        enqueueList("2", "bob");
+        enqueueList("2", "bob");
+
+        ScanOutcome outcome = service.run(SESSION, false);
+
+        assertTrue(outcome.ok());
+        assertEquals(4, server.getRequestCount());
     }
 
     @Test
     public void secondScanReportsFollowerChanges() {
         enqueueList("1", "alice");
-        enqueueList("2", "bob");
+        enqueueFollowerCount(1);
         enqueueList("2", "bob");
         service.run(SESSION, false);
 
         clock.now += 10_000_000L;
         enqueueList("1", "alice");
-        enqueueList("3", "carol");
+        enqueueFollowerCount(1);
         enqueueList("3", "carol");
 
         ScanOutcome outcome = service.run(SESSION, false);
@@ -142,7 +171,7 @@ public class ScanServiceTest {
     public void forceBypassesTheCooldown() {
         prefs.lastScanAt = clock.now - 60_000L;
         enqueueList("1", "alice");
-        enqueueList("2", "bob");
+        enqueueFollowerCount(1);
         enqueueList("2", "bob");
 
         ScanOutcome outcome = service.run(SESSION, true);

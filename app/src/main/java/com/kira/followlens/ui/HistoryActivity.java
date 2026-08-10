@@ -1,7 +1,9 @@
 package com.kira.followlens.ui;
 
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -43,6 +45,14 @@ public class HistoryActivity extends AppCompatActivity {
         RecyclerView scans = findViewById(R.id.scans);
         scans.setLayoutManager(new LinearLayoutManager(this));
         scans.setAdapter(adapter);
+        if (!Motion.reduced(this)) {
+            scans.setLayoutAnimation(
+                    AnimationUtils.loadLayoutAnimation(this, R.anim.layout_rows));
+        }
+
+        View back = findViewById(R.id.back);
+        back.setOnClickListener(v -> finish());
+        Press.applyTo(back);
 
         FollowLensDatabase.get(this).dao().scanHistory(accountId).observe(this, history -> {
             adapter.submit(history);
@@ -51,7 +61,7 @@ public class HistoryActivity extends AppCompatActivity {
             empty.setVisibility(none ? View.VISIBLE : View.GONE);
             if (none) {
                 heroValue.setText(R.string.dash_placeholder);
-                heroDelta.setText("");
+                heroDelta.setVisibility(View.GONE);
                 range.setText("");
                 sparkline.setValues(new int[0]);
                 return;
@@ -68,15 +78,16 @@ public class HistoryActivity extends AppCompatActivity {
             ScanEntity newest = history.get(0);
             heroValue.setText(String.valueOf(newest.followersCount));
 
+            // With a single scan there is no change to state, so the pill is
+            // absent rather than showing a zero that would read as "no growth".
             if (history.size() > 1) {
                 int delta = newest.followersCount - history.get(1).followersCount;
                 heroDelta.setText(ScanAdapter.deltaLabel(newest.followersCount,
                         history.get(1).followersCount));
-                heroDelta.setTextColor(ContextCompat.getColor(this, delta > 0
-                        ? R.color.positive : delta < 0 ? R.color.negative
-                        : R.color.text_disabled));
+                tintDelta(heroDelta, delta);
+                heroDelta.setVisibility(View.VISIBLE);
             } else {
-                heroDelta.setText("");
+                heroDelta.setVisibility(View.GONE);
             }
 
             ScanEntity oldest = history.get(history.size() - 1);
@@ -87,5 +98,22 @@ public class HistoryActivity extends AppCompatActivity {
                             when.format(new Date(oldest.finishedAt)),
                             when.format(new Date(newest.finishedAt))));
         });
+    }
+
+    /**
+     * Colours the change pill by direction, text and fill from the same pair so
+     * the two never drift apart. The sign in the label still carries the
+     * meaning; this only reinforces it.
+     */
+    private void tintDelta(TextView pill, int delta) {
+        int text = delta > 0 ? R.color.positive
+                : delta < 0 ? R.color.negative : R.color.text_disabled;
+        int fill = delta > 0 ? R.color.positive_dim
+                : delta < 0 ? R.color.negative_dim : R.color.surface_muted;
+
+        pill.setTextColor(ContextCompat.getColor(this, text));
+        pill.setBackgroundResource(R.drawable.bg_pill);
+        pill.getBackground().mutate().setColorFilter(
+                ContextCompat.getColor(this, fill), PorterDuff.Mode.SRC_IN);
     }
 }

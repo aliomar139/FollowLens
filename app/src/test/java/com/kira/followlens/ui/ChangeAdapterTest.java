@@ -19,28 +19,31 @@ public class ChangeAdapterTest {
         return event;
     }
 
+    // The row draws the username on its own line, so these describe the action
+    // alone. A label that repeated the name would print it twice.
+
     @Test
     public void labelsANewFollower() {
-        assertEquals("alice started following you",
-                ChangeAdapter.labelFor(change(ChangeDirection.ADDED, ListKind.FOLLOWER, "alice")));
+        assertEquals("Started following you",
+                ChangeAdapter.actionFor(change(ChangeDirection.ADDED, ListKind.FOLLOWER, "alice")));
     }
 
     @Test
     public void labelsAnUnfollow() {
-        assertEquals("bob unfollowed you",
-                ChangeAdapter.labelFor(change(ChangeDirection.REMOVED, ListKind.FOLLOWER, "bob")));
+        assertEquals("Unfollowed you",
+                ChangeAdapter.actionFor(change(ChangeDirection.REMOVED, ListKind.FOLLOWER, "bob")));
     }
 
     @Test
     public void labelsAccountsYouStartedFollowing() {
-        assertEquals("you started following carol",
-                ChangeAdapter.labelFor(change(ChangeDirection.ADDED, ListKind.FOLLOWING, "carol")));
+        assertEquals("You started following",
+                ChangeAdapter.actionFor(change(ChangeDirection.ADDED, ListKind.FOLLOWING, "carol")));
     }
 
     @Test
     public void labelsAccountsYouStoppedFollowing() {
-        assertEquals("you stopped following dave",
-                ChangeAdapter.labelFor(change(ChangeDirection.REMOVED, ListKind.FOLLOWING, "dave")));
+        assertEquals("You stopped following",
+                ChangeAdapter.actionFor(change(ChangeDirection.REMOVED, ListKind.FOLLOWING, "dave")));
     }
 
     @Test

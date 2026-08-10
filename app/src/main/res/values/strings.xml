@@ -2,12 +2,20 @@
 <resources>
     <string name="app_name">FollowLens</string>
     <string name="channel_scan_results">Scan results</string>
+    <string name="channel_scan_progress">Scan in progress</string>
+    <string name="notify_scanning">Scanning Instagram</string>
+    <!-- "Followers · 1240 accounts": the stage, then the running total. -->
+    <string name="notify_scan_progress">%1$s · %2$d accounts</string>
+    <string name="notify_stage_following">Reading who you follow</string>
+    <string name="notify_stage_followers">Reading your followers</string>
+    <string name="notify_stage_saving">Saving results</string>
     <string name="at_sign">@</string>
     <string name="dash_placeholder">—</string>
 
     <string name="session_title">Add your session key</string>
     <string name="session_help">On a computer where you are already logged in to Instagram, open DevTools (F12) → Application → Cookies → https://www.instagram.com, and copy the value of the sessionid cookie. Paste it below.\n\nNo password is entered here. Reusing an existing session avoids the new-device login check.</string>
     <string name="session_hint">sessionid value, or the whole cookie header</string>
+    <string name="session_field_label">Session key</string>
     <string name="session_save">Save session</string>
     <string name="session_saved">Session saved</string>
     <string name="session_invalid">That does not look like a session key. It should start with your numeric user id followed by a colon.</string>
@@ -15,6 +23,8 @@
 
     <string name="refresh">Refresh</string>
     <string name="refresh_running">Scanning…</string>
+    <!-- Shown on the scan button itself once the first page has landed. -->
+    <string name="refresh_counting">Scanning · %1$d</string>
     <string name="changes">Changes</string>
     <string name="not_following_back">Not following back</string>
     <string name="followers">Followers</string>
@@ -40,6 +50,9 @@
 
     <!-- Search and filters -->
     <string name="search_hint">Search username</string>
+    <string name="search_clear">Clear search</string>
+    <string name="selected">selected</string>
+    <string name="back">Back</string>
     <string name="list_empty_search">No account matching “%1$s” in this list.</string>
     <string name="filter_all">All</string>
     <string name="filter_new">New</string>
@@ -47,7 +60,34 @@
 
     <!-- Rows -->
     <string name="badge_mutual">MUTUAL</string>
+    <string name="badge_new">NEW</string>
+    <string name="section_new">New since last scan</string>
+    <string name="section_earlier">Earlier</string>
+    <string name="badge_new_spoken">new since the last scan</string>
     <string name="no_browser">No app available to open Instagram.</string>
+
+    <!-- Account -->
+    <string name="account_title">Account</string>
+    <string name="account_open">Account and session</string>
+    <string name="account_id_format">Account %1$s</string>
+    <string name="account_session_active">Session active</string>
+    <!-- Only the leading user id is ever shown. The rest of the key is a live
+         credential and is masked wherever it appears. -->
+    <string name="account_session_masked">sessionid %1$s:••••••••</string>
+    <string name="account_fact_scans">Scans taken</string>
+    <string name="account_fact_last_scan">Last scan</string>
+    <string name="account_fact_followers">Followers</string>
+    <string name="account_fact_following">Following</string>
+    <string name="account_fact_csrf">CSRF token</string>
+    <string name="account_fact_csrf_present">Included</string>
+    <string name="account_fact_csrf_missing">Not pasted</string>
+    <string name="account_fact_none">—</string>
+    <string name="account_switch">Use a different session</string>
+    <string name="account_sign_out">Sign out</string>
+    <string name="account_sign_out_title">Sign out of this account?</string>
+    <string name="account_sign_out_body">The session key is deleted from this device. Your scan history stays, so signing back in with the same account picks up where you left off.</string>
+    <string name="account_sign_out_confirm">Sign out</string>
+    <string name="account_sign_out_cancel">Cancel</string>
 
     <!-- History -->
     <string name="history">History</string>

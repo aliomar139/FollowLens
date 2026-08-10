@@ -1,5 +1,7 @@
 package com.kira.followlens.ui;
 
+import android.content.Context;
+import android.graphics.PorterDuff;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,21 +20,34 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class ChangeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_CHANGE = 1;
 
+    /** The account lists' tints, so one person keeps one colour app-wide. */
+    private static final int[] TINTS = {
+            R.color.tint_1, R.color.tint_2, R.color.tint_3,
+            R.color.tint_4, R.color.tint_5, R.color.tint_6,
+    };
+
     private final List<ChangeFeedItems.Item> items = new ArrayList<>();
 
-    /** Package-visible and static so it can be unit tested without a View. */
-    static String labelFor(ChangeEventEntity event) {
+    /**
+     * What happened, without the name.
+     *
+     * The row shows the username on its own line above this, so repeating it
+     * here would print it twice. Package-visible and static so it can be unit
+     * tested without a View.
+     */
+    static String actionFor(ChangeEventEntity event) {
         boolean added = event.direction == ChangeDirection.ADDED;
         if (event.kind == ListKind.FOLLOWER) {
-            return event.username + (added ? " started following you" : " unfollowed you");
+            return added ? "Started following you" : "Unfollowed you";
         }
-        return "you " + (added ? "started following " : "stopped following ") + event.username;
+        return added ? "You started following" : "You stopped following";
     }
 
     /** The glyph, not the colour, is what conveys direction. */
@@ -72,12 +87,31 @@ public class ChangeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
         ChangeHolder changeHolder = (ChangeHolder) holder;
         ChangeEventEntity event = item.change();
-        changeHolder.label.setText(labelFor(event));
+        boolean added = event.direction == ChangeDirection.ADDED;
+        Context context = changeHolder.itemView.getContext();
+
+        changeHolder.username.setText(event.username);
+        changeHolder.label.setText(actionFor(event));
         changeHolder.sign.setText(signFor(event));
-        changeHolder.sign.setTextColor(ContextCompat.getColor(
-                changeHolder.itemView.getContext(),
-                event.direction == ChangeDirection.ADDED
-                        ? R.color.positive : R.color.negative));
+
+        // The same monogram the account lists draw, from the same helpers, so a
+        // person keeps one colour and one letter everywhere in the app.
+        changeHolder.monogram.setText(Monogram.initialOf(event.username));
+        changeHolder.monogram.getBackground().mutate().setColorFilter(
+                ContextCompat.getColor(context, TINTS[Monogram.tintIndexOf(event.userId)]),
+                PorterDuff.Mode.SRC_IN);
+
+        changeHolder.sign.setTextColor(ContextCompat.getColor(context,
+                added ? R.color.positive : R.color.negative));
+        // mutate() first: the disc is inflated from one shared constant state,
+        // so tinting it without a private copy recolours every other row too.
+        changeHolder.sign.getBackground().mutate().setColorFilter(
+                ContextCompat.getColor(context,
+                        added ? R.color.positive_dim : R.color.negative_dim),
+                PorterDuff.Mode.SRC_IN);
+
+        changeHolder.itemView.setContentDescription(
+                event.username + ", " + actionFor(event).toLowerCase(Locale.getDefault()));
     }
 
     @Override
@@ -95,11 +129,15 @@ public class ChangeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     static class ChangeHolder extends RecyclerView.ViewHolder {
+        final TextView monogram;
+        final TextView username;
         final TextView label;
         final TextView sign;
 
         ChangeHolder(View view) {
             super(view);
+            monogram = view.findViewById(R.id.monogram);
+            username = view.findViewById(R.id.username);
             label = view.findViewById(R.id.label);
             sign = view.findViewById(R.id.sign);
         }

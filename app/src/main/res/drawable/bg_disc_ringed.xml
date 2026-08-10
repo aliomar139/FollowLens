@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Disc for the direction glyph where it overlaps the monogram. The ring is the
+  card's own colour, not a border: it cuts the disc out of the avatar behind it
+  so the two shapes stay separable at 20dp. Tinted per direction in code.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+    <solid android:color="@color/surface_muted" />
+    <stroke android:width="2dp" android:color="@color/surface" />
+</shape>

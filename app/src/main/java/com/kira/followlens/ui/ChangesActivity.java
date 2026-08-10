@@ -2,7 +2,7 @@ package com.kira.followlens.ui;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -25,9 +25,12 @@ public class ChangesActivity extends AppCompatActivity {
     private ChangeFilter.Mode mode = ChangeFilter.Mode.ALL;
     private List<ChangeEventEntity> loaded;
 
-    private Button filterAll;
-    private Button filterNew;
-    private Button filterLost;
+    /** Segment order, so an index maps back to a filter without a switch. */
+    private static final ChangeFilter.Mode[] MODES = {
+            ChangeFilter.Mode.ALL,
+            ChangeFilter.Mode.ADDED_ONLY,
+            ChangeFilter.Mode.REMOVED_ONLY,
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,13 +50,22 @@ public class ChangesActivity extends AppCompatActivity {
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
-        filterAll = findViewById(R.id.filter_all);
-        filterNew = findViewById(R.id.filter_new);
-        filterLost = findViewById(R.id.filter_lost);
-        filterAll.setOnClickListener(v -> select(ChangeFilter.Mode.ALL));
-        filterNew.setOnClickListener(v -> select(ChangeFilter.Mode.ADDED_ONLY));
-        filterLost.setOnClickListener(v -> select(ChangeFilter.Mode.REMOVED_ONLY));
-        markSelected();
+        if (!Motion.reduced(this)) {
+            list.setLayoutAnimation(
+                    AnimationUtils.loadLayoutAnimation(this, R.anim.layout_rows));
+        }
+
+        CharSequence[] labels = {
+                getString(R.string.filter_all),
+                getString(R.string.filter_new),
+                getString(R.string.filter_lost),
+        };
+        Segmented.install(findViewById(R.id.filter_segments), labels, 0, true,
+                index -> select(MODES[index]));
+
+        View back = findViewById(R.id.back);
+        back.setOnClickListener(v -> finish());
+        Press.applyTo(back);
 
         FollowLensDatabase.get(this).dao().changeFeed(accountId).observe(this, events -> {
             loaded = events;
@@ -63,18 +75,7 @@ public class ChangesActivity extends AppCompatActivity {
 
     private void select(ChangeFilter.Mode next) {
         mode = next;
-        markSelected();
         render();
-    }
-
-    /**
-     * The active filter is shown by enabling state rather than colour alone, so
-     * which one is selected does not depend on seeing the accent.
-     */
-    private void markSelected() {
-        filterAll.setEnabled(mode != ChangeFilter.Mode.ALL);
-        filterNew.setEnabled(mode != ChangeFilter.Mode.ADDED_ONLY);
-        filterLost.setEnabled(mode != ChangeFilter.Mode.REMOVED_ONLY);
     }
 
     private void render() {

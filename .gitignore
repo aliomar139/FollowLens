@@ -1,0 +1,30 @@
+# ── Machine-specific ──
+# SDK and JDK paths differ per machine
+local.properties
+
+# ── Gradle / build output ──
+.gradle/
+/build/
+app/build/
+captures/
+
+# ── Signing & artifacts — NEVER commit ──
+*.apk
+*.aab
+*.keystore
+*.jks
+keystore.properties
+
+# ── IDE ──
+.idea/
+*.iml
+*.hprof
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+
+# NOTE: do not add a bare `data/` rule here. In the original monorepo that rule
+# (meant for the Python scraper's snapshots) silently matched
+# app/src/main/java/com/kira/followlens/data/ and kept the entire Room
+# persistence layer out of version control.

@@ -42,6 +42,17 @@ public class ScanService {
     }
 
     public ScanOutcome run(String sessionId, boolean force) {
+        return run(sessionId, force, ScanProgress.NONE);
+    }
+
+    /**
+     * @param progress told as each page lands, so a caller can show how far the
+     *                 scan has got. Reporting never affects the outcome: a
+     *                 listener that throws would fail a scan that had otherwise
+     *                 succeeded, so it is kept to the one call below and nothing
+     *                 downstream depends on it.
+     */
+    public ScanOutcome run(String sessionId, boolean force, ScanProgress progress) {
         if (sessionId == null) {
             return ScanOutcome.skipped("No session. Log in to Instagram first.");
         }
@@ -61,18 +72,30 @@ public class ScanService {
         }
 
         IgWebClient client = clientFactory.create(sessionId);
+        client.setPageListener((kind, collected) -> progress.onProgress(
+                "following".equals(kind)
+                        ? ScanProgress.Stage.FOLLOWING
+                        : ScanProgress.Stage.FOLLOWERS,
+                collected));
 
         Map<String, String> following;
         Map<String, String> followers;
         try {
             // Both lists are fetched completely before anything is written.
             following = client.following(accountId);
-            followers = client.followers(accountId, FOLLOWER_PASSES);
+
+            // One cheap request that can save an entire extra walk of the
+            // followers list. It is allowed to fail: null simply means the
+            // fetch below decides when to stop the way it always has.
+            Integer expectedFollowers = client.followerCount(accountId);
+            followers = client.followers(accountId, FOLLOWER_PASSES, expectedFollowers);
         } catch (IgException.SessionExpired e) {
             return ScanOutcome.skipped(e.getMessage());
         } catch (IgException | IOException e) {
             return ScanOutcome.failed(e.getMessage());
         }
+
+        progress.onProgress(ScanProgress.Stage.SAVING, followers.size() + following.size());
 
         repository.ensureAccount(accountId, accountId);
         long scanId = repository.commitScan(accountId, followers, following, now,

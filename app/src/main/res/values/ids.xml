@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Keys for view tags. They name nothing on screen; see Motion. -->
+<resources>
+    <item name="spring_scale_x" type="id" />
+    <item name="spring_scale_y" type="id" />
+    <item name="spring_other" type="id" />
+</resources>

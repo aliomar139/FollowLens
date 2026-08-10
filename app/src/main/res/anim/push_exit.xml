@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The screen being covered slides a short way in the same direction and dims,
+  which reads as it being pushed back rather than thrown off-screen. Parallax
+  like this is what tells you it is still there, one layer down.
+-->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@interpolator/decel_soft">
+    <translate
+        android:duration="320"
+        android:fromXDelta="0"
+        android:toXDelta="-24%p" />
+    <alpha
+        android:duration="320"
+        android:fromAlpha="1"
+        android:toAlpha="0.55" />
+</set>

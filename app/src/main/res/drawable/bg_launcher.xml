@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Only the inset margin around the artwork ever shows, so this exists to make
+  that margin disappear rather than to be seen. The supplied icon is lit from
+  the top right — sampled corners run #58007A there down to #050222 at the
+  bottom — and a flat fill would leave a visible seam on one side of the mask.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:type="radial"
+        android:centerX="0.82"
+        android:centerY="0.16"
+        android:gradientRadius="115%"
+        android:startColor="#FF58007A"
+        android:centerColor="#FF1B0345"
+        android:endColor="#FF050222" />
+</shape>

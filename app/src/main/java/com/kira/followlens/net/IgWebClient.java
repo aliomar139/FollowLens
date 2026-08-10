@@ -25,11 +25,32 @@ public class IgWebClient {
 
     public static final String APP_ID = "936619743392459";
 
+    /**
+     * Told after every page that lands, with the running unique-account total.
+     *
+     * The client reports pages because it is the only layer that knows when one
+     * arrives; it deliberately does not know what the caller does with that.
+     */
+    public interface PageListener {
+        void onPage(String kind, int collected);
+    }
+
     private static final String USER_AGENT =
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                     + "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
 
-    private static final int MAX_PAGES_PER_PASS = 40;
+    /**
+     * A runaway guard, not a product limit.
+     *
+     * It used to be 40, which at 100 accounts a page meant a hard ceiling of
+     * 4,000 followers — and walkOnce hit that ceiling silently, handing back a
+     * truncated list that the caller then committed as the complete one. On a
+     * larger account that reads as a mass unfollow that never happened. The
+     * cap is now high enough that no real account reaches it, and running out
+     * of pages is treated as the failure it is rather than as an ending.
+     */
+    private static final int MAX_PAGES_PER_PASS = 200;
+
     private static final int FOLLOWING_PAGE_SIZE = 200;
     private static final int FOLLOWERS_PAGE_SIZE = 100;
 
@@ -43,6 +64,8 @@ public class IgWebClient {
     private final double jitterSeconds;
     private final OkHttpClient http;
     private final Random random = new Random();
+    private PageListener pageListener = (kind, collected) -> {
+    };
 
     /**
      * @param baseUrl       normally https://www.instagram.com/, injectable so
@@ -81,37 +104,140 @@ public class IgWebClient {
                 .build();
     }
 
+    /** Reporting is optional and off by default; tests never set one. */
+    public void setPageListener(PageListener listener) {
+        this.pageListener = listener == null ? (kind, collected) -> {
+        } : listener;
+    }
+
     /** Returns the full following list as user id to username. */
     public Map<String, String> following(String uid) throws IgException, IOException {
         Map<String, String> out = new LinkedHashMap<>();
-        walkOnce(uid, "following", FOLLOWING_PAGE_SIZE, out);
+        boolean complete = walkOnce(uid, "following", FOLLOWING_PAGE_SIZE, out);
+        if (!complete) {
+            throw new IgException.Fetch("following for " + uid + " still had more pages after "
+                    + MAX_PAGES_PER_PASS + "; aborting so a partial list is not stored as a"
+                    + " full one.");
+        }
         return out;
+    }
+
+    /** Kept for callers with no expected count; behaves exactly as before. */
+    public Map<String, String> followers(String uid, int maxPasses)
+            throws IgException, IOException {
+        return followers(uid, maxPasses, null);
     }
 
     /**
      * Returns the full followers list as user id to username.
      *
      * The followers endpoint paginates inconsistently, so this runs repeated
-     * full passes and unions the results, stopping early once a pass adds no
-     * new accounts.
+     * full passes and unions the results. Two things end it early.
+     *
+     * The first is {@code expected}: once the union has reached the number of
+     * followers the account reports having, there is nothing left to find and
+     * further passes are pure cost. This is where the time goes — without it
+     * the loop cannot know pass one was complete, so it always pays for a
+     * second pass to prove it.
+     *
+     * The second is the original test, kept as the fallback for when no
+     * expected count is available: stop once a pass adds nobody new.
+     *
+     * @param expected how many followers the account reports, or null when that
+     *                 could not be established. Null means every decision below
+     *                 falls back to the behaviour this method has always had.
      */
-    public Map<String, String> followers(String uid, int maxPasses)
+    public Map<String, String> followers(String uid, int maxPasses, Integer expected)
             throws IgException, IOException {
         Map<String, String> out = new LinkedHashMap<>();
         int previousSize = -1;
+        boolean truncated = false;
+
         for (int pass = 0; pass < maxPasses; pass++) {
-            walkOnce(uid, "followers", FOLLOWERS_PAGE_SIZE, out);
+            truncated |= !walkOnce(uid, "followers", FOLLOWERS_PAGE_SIZE, out);
+
+            // Reaching the reported total is proof of completeness that no
+            // amount of re-walking can improve on.
+            if (expected != null && out.size() >= expected) {
+                return out;
+            }
             if (out.size() == previousSize) {
                 break;
             }
             previousSize = out.size();
             pause();
         }
+
+        // Falling out of the page loop with a live cursor is not an ending. If
+        // the union never reached the expected total either, the list in hand is
+        // short and committing it would invent unfollows.
+        if (truncated) {
+            throw new IgException.Fetch("followers for " + uid + " still had more pages after "
+                    + MAX_PAGES_PER_PASS + "; aborting so a partial list is not stored as a"
+                    + " full one.");
+        }
         return out;
     }
 
-    /** Walks every page of one list once, merging into {@code out}. */
-    private void walkOnce(String uid, String kind, int pageSize, Map<String, String> out)
+    /**
+     * How many followers the account reports having, or null if that cannot be
+     * established right now.
+     *
+     * Deliberately best-effort and deliberately not routed through {@link #get},
+     * which retries a 429 twice with fifteen and thirty second backoffs. This
+     * call exists to make the scan faster; paying forty-five seconds for it when
+     * the endpoint is unhappy would defeat the entire point. One attempt, and
+     * any failure at all means null and the caller carries on as before.
+     */
+    public Integer followerCount(String uid) {
+        HttpUrl url = baseUrl.newBuilder()
+                .addPathSegments("api/v1/users/" + uid + "/info/")
+                .build();
+        try (Response response = http.newCall(profileRequest(url)).execute()) {
+            if (response.code() != 200) {
+                return null;
+            }
+            JsonElement parsed = JsonParser.parseString(response.body().string());
+            JsonObject user = parsed.getAsJsonObject().getAsJsonObject("user");
+            JsonElement count = user == null ? null : user.get("follower_count");
+            if (count == null || count.isJsonNull()) {
+                return null;
+            }
+            int value = count.getAsInt();
+            return value <= 0 ? null : value;
+        } catch (IOException | RuntimeException e) {
+            // Any shape of failure — offline, throttled, a body that changed
+            // shape — is the same answer: we do not know, so do it the long way.
+            return null;
+        }
+    }
+
+    private Request profileRequest(HttpUrl url) {
+        bootstrapCsrfTokenOnce();
+        Request.Builder builder = new Request.Builder()
+                .url(url)
+                .header("x-ig-app-id", APP_ID)
+                .header("user-agent", USER_AGENT)
+                .header("accept", "*/*")
+                .header("accept-language", "en-US,en;q=0.9")
+                .header("referer", "https://www.instagram.com/")
+                .header("cookie", cookieHeader());
+        if (csrfToken != null) {
+            builder.header("x-csrftoken", csrfToken);
+        }
+        return builder.build();
+    }
+
+    /**
+     * Walks every page of one list once, merging into {@code out}.
+     *
+     * @return true if the walk ended because the endpoint said there was no next
+     *         page. False means it ran out of page budget with a live cursor
+     *         still in hand, which is not the same thing and must not be
+     *         mistaken for one — that mistake is what let a truncated list be
+     *         committed as a complete one.
+     */
+    private boolean walkOnce(String uid, String kind, int pageSize, Map<String, String> out)
             throws IgException, IOException {
         String maxId = null;
         for (int i = 0; i < MAX_PAGES_PER_PASS; i++) {
@@ -140,13 +266,19 @@ public class IgWebClient {
                 }
             }
 
+            // Reported after the merge, so the number is unique accounts held
+            // rather than rows seen: the followers endpoint repeats itself
+            // across passes and a raw row count would climb past the real total.
+            pageListener.onPage(kind, out.size());
+
             JsonElement next = body.get("next_max_id");
             if (next == null || next.isJsonNull()) {
-                return;
+                return true;
             }
             maxId = next.getAsString();
             pause();
         }
+        return false;
     }
 
     /**

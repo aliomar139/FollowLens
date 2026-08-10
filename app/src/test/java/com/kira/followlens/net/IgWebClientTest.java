@@ -1,6 +1,7 @@
 package com.kira.followlens.net;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
@@ -157,6 +158,70 @@ public class IgWebClientTest {
 
         assertEquals(1, result.size());
         assertEquals(2, server.getRequestCount());
+    }
+
+    /**
+     * The expensive part of a scan is re-walking the followers list to prove the
+     * first walk was complete. A reported total proves it for free.
+     */
+    @Test
+    public void followersStopsAfterOnePassOnceTheExpectedTotalIsReached() throws Exception {
+        server.enqueue(page(null, "1", "alice", "2", "bob"));
+
+        Map<String, String> result = client.followers("999", 3, 2);
+
+        assertEquals(2, result.size());
+        assertEquals(1, server.getRequestCount());
+    }
+
+    /**
+     * An expected total that is never reached must not shorten anything: the
+     * fetch falls back to proving completeness the long way.
+     */
+    @Test
+    public void followersKeepsPassingWhenTheExpectedTotalIsNotReached() throws Exception {
+        server.enqueue(page(null, "1", "alice"));
+        server.enqueue(page(null, "1", "alice"));
+
+        Map<String, String> result = client.followers("999", 3, 99);
+
+        assertEquals(1, result.size());
+        assertEquals(2, server.getRequestCount());
+    }
+
+    @Test
+    public void followerCountReadsTheReportedTotal() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(200)
+                .setBody("{\"user\":{\"follower_count\":812,\"following_count\":300}}"));
+
+        assertEquals(Integer.valueOf(812), client.followerCount("999"));
+        assertTrue(server.takeRequest().getPath().contains("/api/v1/users/999/info/"));
+    }
+
+    /**
+     * Every failure shape collapses to null, because the caller's fallback is
+     * correct and an exception here would fail a scan that could have succeeded.
+     */
+    @Test
+    public void followerCountIsNullWheneverItCannotBeEstablished() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(429));
+        assertNull(client.followerCount("999"));
+
+        server.enqueue(new MockResponse().setResponseCode(200).setBody("<html>nope</html>"));
+        assertNull(client.followerCount("999"));
+
+        server.enqueue(new MockResponse().setResponseCode(200).setBody("{\"user\":{}}"));
+        assertNull(client.followerCount("999"));
+    }
+
+    /** One attempt only: the 429 backoff would cost more than this call saves. */
+    @Test
+    public void followerCountNeverRetries() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(429));
+
+        client.followerCount("999");
+
+        assertEquals(1, server.getRequestCount());
     }
 
     @Test

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A short stagger, capped by delay rather than by item count: 8% of 260ms means
+  the tenth row is still on screen within a quarter second, so a long list never
+  turns the entrance into a wait.
+-->
+<layoutAnimation xmlns:android="http://schemas.android.com/apk/res/android"
+    android:animation="@anim/row_enter"
+    android:animationOrder="normal"
+    android:delay="8%" />

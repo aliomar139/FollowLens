@@ -3,19 +3,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg"
+    android:fillViewport="true"
     android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:paddingStart="20dp"
+        android:paddingTop="20dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="32dp">
 
         <View
-            android:layout_width="40dp"
+            android:layout_width="44dp"
             android:layout_height="4dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="28dp"
             android:background="@drawable/bg_accent_bar" />
 
         <TextView
@@ -24,26 +28,49 @@
             android:text="@string/session_title"
             style="@style/Text.Title" />
 
+        <!--
+          The instructions live in their own panel rather than as loose text.
+          They are a set of steps to follow while looking somewhere else, and a
+          bounded surface is what makes them findable again afterwards.
+        -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/bg_card"
+            android:paddingStart="16dp"
+            android:paddingTop="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="16dp"
             android:text="@string/session_help"
             style="@style/Text.Caption" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/session_field_label"
+            style="@style/Text.StatLabel" />
+
+        <!--
+          Monospace here is deliberate and not decoration: a session key is an
+          opaque string that gets visually checked character by character, which
+          is the one job a fixed-width face is actually better at.
+        -->
         <EditText
             android:id="@+id/session_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
             android:background="@drawable/bg_input"
             android:fontFamily="monospace"
             android:gravity="top|start"
             android:hint="@string/session_hint"
             android:importantForAutofill="no"
             android:inputType="textMultiLine|textNoSuggestions"
+            android:lineSpacingMultiplier="1.3"
             android:minLines="4"
-            android:padding="14dp"
+            android:padding="16dp"
             android:textColor="@color/text_primary"
             android:textColorHint="@color/text_disabled"
             android:textSize="13sp" />
@@ -53,26 +80,27 @@
             android:id="@+id/session_error"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:textColor="@color/warning"
             android:textSize="13sp"
-            android:visibility="gone" />
+            android:visibility="gone"
+            style="@style/Text.Caption" />
 
         <Button
             android:id="@+id/session_save"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
+            android:layout_marginTop="20dp"
             android:text="@string/session_save"
             style="@style/Button.Primary" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
             android:text="@string/session_privacy"
-            android:textColor="@color/text_disabled"
-            android:textSize="12sp" />
+            style="@style/Text.Footnote" />
 
     </LinearLayout>
 

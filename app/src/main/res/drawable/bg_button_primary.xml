@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Ripple gives the press feedback Material requires. The colour changes but the
-  bounds never do, so pressing cannot shift the layout.
+  bounds never do, so pressing cannot shift the layout. The scale response lives
+  in Press, on the view itself, where it can be interrupted mid-flight.
 -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="@color/ripple">
@@ -10,19 +11,22 @@
             <item android:state_enabled="false">
                 <shape android:shape="rectangle">
                     <solid android:color="@color/accent_disabled" />
-                    <corners android:radius="12dp" />
+                    <corners android:radius="16dp" />
                 </shape>
             </item>
             <item android:state_pressed="true">
                 <shape android:shape="rectangle">
                     <solid android:color="@color/accent_pressed" />
-                    <corners android:radius="12dp" />
+                    <corners android:radius="16dp" />
                 </shape>
             </item>
             <item>
                 <shape android:shape="rectangle">
-                    <solid android:color="@color/accent" />
-                    <corners android:radius="12dp" />
+                    <gradient
+                        android:angle="270"
+                        android:startColor="@color/accent_bright"
+                        android:endColor="@color/accent" />
+                    <corners android:radius="16dp" />
                 </shape>
             </item>
         </selector>

@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  A panel, not a rectangle. The vertical gradient is barely two steps wide, but
+  it is what makes the top edge read as catching light and the bottom as falling
+  into shadow: the difference between a surface and a fill.
+-->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="@color/surface" />
-    <stroke android:width="1dp" android:color="@color/border" />
-    <corners android:radius="14dp" />
+    <gradient
+        android:angle="270"
+        android:startColor="@color/surface_raised"
+        android:endColor="@color/surface" />
+    <stroke android:width="1dp" android:color="@color/hairline" />
+    <corners android:radius="20dp" />
 </shape>

@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.kira.followlens.R;
 import com.kira.followlens.ui.DashboardActivity;
+import com.kira.followlens.ui.Press;
 
 /**
  * Takes a session key pasted from a browser where the user is already logged in.
@@ -39,6 +40,7 @@ public class SessionActivity extends AppCompatActivity {
 
         Button save = findViewById(R.id.session_save);
         save.setOnClickListener(v -> save());
+        Press.applyTo(save);
     }
 
     private void save() {

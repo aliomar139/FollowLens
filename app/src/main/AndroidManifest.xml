@@ -6,6 +6,8 @@
 
     <application
         android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.FollowLens">
@@ -23,6 +25,12 @@
             android:name=".auth.SessionActivity"
             android:exported="false"
             android:label="@string/session_title" />
+
+        <activity
+            android:name=".ui.AccountActivity"
+            android:exported="false"
+            android:label="@string/account_title"
+            android:theme="@style/Theme.FollowLens.Modal" />
 
         <activity
             android:name=".ui.ChangesActivity"

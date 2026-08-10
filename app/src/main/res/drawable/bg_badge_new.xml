@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The loud badge, and the only solid accent fill in a list row. It marks the one
+  thing that changed since the last scan, which is what the screen is being
+  opened to find. If everything were badged this way none of it would carry.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:angle="270"
+        android:startColor="@color/accent_bright"
+        android:endColor="@color/accent" />
+    <corners android:radius="999dp" />
+</shape>

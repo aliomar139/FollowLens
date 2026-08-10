@@ -13,9 +13,37 @@
         <item name="android:textColorSecondary">@color/text_secondary</item>
         <item name="android:textColorHint">@color/text_disabled</item>
         <item name="colorAccent">@color/accent</item>
-        <item name="android:statusBarColor">@color/bg</item>
-        <item name="android:navigationBarColor">@color/bg</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowAnimationStyle">@style/Animation.FollowLens</item>
+    </style>
+
+    <!--
+      The account popover. It is a real activity but must not look like a
+      screen: the window is transparent so the dashboard stays visible behind
+      the scrim, and the window animation is switched off because the panel
+      animates itself, from the corner it was opened from. A window animation
+      cannot be given a pivot, and the pivot is the entire point.
+    -->
+    <style name="Theme.FollowLens.Modal" parent="Theme.FollowLens">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
+    <!--
+      Screens enter from the trailing edge and leave back to it, so a push and
+      its return travel the same path. A screen that slid in from the right and
+      dismissed downwards would break the sense of where it went.
+    -->
+    <style name="Animation.FollowLens" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/push_enter</item>
+        <item name="android:activityOpenExitAnimation">@anim/push_exit</item>
+        <item name="android:activityCloseEnterAnimation">@anim/pop_enter</item>
+        <item name="android:activityCloseExitAnimation">@anim/pop_exit</item>
     </style>
 
     <!--
@@ -25,38 +53,91 @@
     -->
     <style name="Text" />
 
-    <!-- Type scale. Stats use monospace so digits are tabular and the numbers
-         do not jitter in width as they change between scans. -->
-    <style name="Text.Stat">
-        <item name="android:fontFamily">monospace</item>
+    <!--
+      Tracking is size-specific throughout this scale, never one value reused.
+      Letters drift apart as type grows, so display sizes pull in; small caps
+      labels need the opposite and are opened up. A single letterSpacing across
+      the scale is always wrong at one end of it.
+
+      Numbers use the system face with tabular figures rather than a monospace
+      font: `tnum` stops digits jittering in width between scans, which is the
+      only reason monospace was here, without the typewriter texture.
+    -->
+    <style name="Text.Display">
         <item name="android:textColor">@color/text_primary</item>
-        <item name="android:textSize">26sp</item>
+        <item name="android:textSize">40sp</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">-0.035</item>
+        <item name="android:lineSpacingMultiplier">1.02</item>
+        <item name="android:fontFeatureSettings">tnum</item>
         <item name="android:includeFontPadding">false</item>
     </style>
 
+    <style name="Text.Stat">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">-0.03</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="Text.Numeric">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+    </style>
+
+    <!-- Small caps labels: opened up, because caps at 11sp close up otherwise. -->
     <style name="Text.StatLabel">
         <item name="android:textColor">@color/text_secondary</item>
-        <item name="android:textSize">12sp</item>
-        <item name="android:letterSpacing">0.06</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.09</item>
         <item name="android:textAllCaps">true</item>
     </style>
 
+    <!-- Screen title. Large, so it tightens. -->
     <style name="Text.Title">
         <item name="android:textColor">@color/text_primary</item>
-        <item name="android:textSize">22sp</item>
+        <item name="android:textSize">30sp</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">-0.03</item>
+        <item name="android:includeFontPadding">false</item>
     </style>
 
+    <!-- Section heading inside a screen. -->
+    <style name="Text.Headline">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">-0.015</item>
+    </style>
+
+    <!-- Body sits at neutral tracking; leading is comfortable, not dense. -->
     <style name="Text.Body">
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:textSize">15sp</item>
-        <item name="android:lineSpacingMultiplier">1.4</item>
+        <item name="android:letterSpacing">-0.005</item>
+        <item name="android:lineSpacingMultiplier">1.35</item>
+    </style>
+
+    <!-- A row's primary name: body size, extra weight for presence. -->
+    <style name="Text.BodyStrong" parent="Text.Body">
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="Text.Caption">
         <item name="android:textColor">@color/text_secondary</item>
         <item name="android:textSize">13sp</item>
+        <item name="android:letterSpacing">0.005</item>
+        <item name="android:lineSpacingMultiplier">1.4</item>
+    </style>
+
+    <style name="Text.Footnote">
+        <item name="android:textColor">@color/text_disabled</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:letterSpacing">0.01</item>
         <item name="android:lineSpacingMultiplier">1.4</item>
     </style>
 
@@ -66,17 +147,39 @@
         <item name="android:textColor">@color/on_accent</item>
         <item name="android:textSize">15sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:minHeight">48dp</item>
-        <item name="android:letterSpacing">0.02</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:letterSpacing">-0.01</item>
         <item name="android:textAllCaps">false</item>
+        <item name="android:stateListAnimator">@null</item>
     </style>
 
     <style name="Button.Secondary" parent="Widget.AppCompat.Button.Borderless">
         <item name="android:background">@drawable/bg_button_secondary</item>
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:textSize">15sp</item>
-        <item name="android:minHeight">48dp</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:letterSpacing">-0.01</item>
         <item name="android:textAllCaps">false</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <!--
+      One segment of a segmented control. Selection is carried by the drawable's
+      selected state, and every segment also sets contentDescription in code, so
+      which one is active never rests on colour alone.
+    -->
+    <style name="Segment">
+        <item name="android:background">@drawable/bg_segment</item>
+        <item name="android:textColor">@color/segment_text</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">-0.01</item>
+        <item name="android:gravity">center</item>
+        <item name="android:minHeight">40dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:includeFontPadding">false</item>
     </style>
 
 </resources>

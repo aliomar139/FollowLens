@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A spring settles fast and then eases the last few pixels out. A path
+  interpolator with a long tail is the closest a view animation gets to that
+  without running a physics simulation, and it is what every screen push uses.
+-->
+<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:controlX1="0.16" android:controlY1="0.84"
+    android:controlX2="0.24" android:controlY2="1" />

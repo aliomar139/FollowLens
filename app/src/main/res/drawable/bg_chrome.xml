@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Floating chrome that content scrolls beneath. Real backdrop blur needs API 31
+  and this app ships to 26, so the layer is a near-opaque wash of the base
+  colour with a bright hairline on top: the light-catching edge that keeps it
+  reading as a pane over the page rather than a hole cut in it.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/chrome" />
+        </shape>
+    </item>
+    <item android:gravity="top" android:height="1dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/edge_light" />
+        </shape>
+    </item>
+</layer-list>

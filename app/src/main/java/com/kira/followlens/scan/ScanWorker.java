@@ -4,9 +4,11 @@ import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import com.kira.followlens.R;
 import com.kira.followlens.auth.SessionStore;
 import com.kira.followlens.data.FollowLensDatabase;
 import com.kira.followlens.data.ScanRepository;
@@ -23,6 +25,16 @@ import okhttp3.HttpUrl;
 public class ScanWorker extends Worker {
 
     public static final String KEY_FORCE = "force";
+
+    /**
+     * Progress fields published to whoever is observing this work.
+     *
+     * The same numbers already drive the notification; publishing them here lets
+     * the open app show the identical count instead of a second, differently
+     * worded guess at the same thing.
+     */
+    public static final String KEY_STAGE = "stage";
+    public static final String KEY_COLLECTED = "collected";
 
     /** Tag used to observe scan progress from the UI. */
     public static final String TAG = "followlens-scan";
@@ -51,10 +63,27 @@ public class ScanWorker extends Worker {
                         ScanService.DELAY_SECONDS, ScanService.JITTER_SECONDS));
 
         boolean userInitiated = getInputData().getBoolean(KEY_FORCE, false);
+        ScanNotifier notifier = new ScanNotifier(context);
 
         ScanOutcome outcome;
         try {
-            outcome = service.run(sessionStore.sessionId(), userInitiated);
+            outcome = service.run(sessionStore.sessionId(), userInitiated, (stage, collected) -> {
+                // A stopped worker keeps running: the sleep between pages swallows
+                // the interrupt, and OkHttp does not answer to one either. Tapping
+                // Refresh mid-scan REPLACEs this work, so a cancelled worker can
+                // still be walking pages while its replacement runs — and posting
+                // from here would put the notification back up after the live scan
+                // had already taken it down.
+                if (isStopped()) {
+                    return;
+                }
+                String text = stageText(context, stage);
+                notifier.showProgress(text, collected);
+                setProgressAsync(new Data.Builder()
+                        .putString(KEY_STAGE, text)
+                        .putInt(KEY_COLLECTED, collected)
+                        .build());
+            });
         } catch (RuntimeException e) {
             // A crashed worker is worse than a retried one: WorkManager marks the
             // periodic chain FAILURE and stops scanning until the app is opened
@@ -62,6 +91,11 @@ public class ScanWorker extends Worker {
             Log.w(LOG_TAG, "scan threw " + e.getClass().getSimpleName(), e);
             status.setLastError(e.getClass().getSimpleName() + ": " + e.getMessage());
             return userInitiated ? Result.failure() : Result.retry();
+        } finally {
+            // Every exit clears it, including the throw above. An ongoing
+            // notification left behind cannot be swiped away, so a crashed scan
+            // would otherwise leave the app claiming to be working forever.
+            notifier.clearProgress();
         }
 
         if (outcome.ok()) {
@@ -75,7 +109,7 @@ public class ScanWorker extends Worker {
             status.setLastError(outcome.error());
         }
 
-        new ScanNotifier(context).notifyScan(outcome);
+        notifier.notifyScan(outcome);
 
         if (outcome.ok()) {
             return Result.success();
@@ -87,5 +121,34 @@ public class ScanWorker extends Worker {
             return Result.failure();
         }
         return outcome.retryable() ? Result.retry() : Result.success();
+    }
+
+    /**
+     * Called when WorkManager stops this worker: cancellation, a lost network
+     * constraint, or the ten-minute execution limit.
+     *
+     * doWork()'s finally block cannot be relied on here. It runs on the worker
+     * thread, which may be somewhere inside a page fetch, and the process is
+     * killable from the moment the worker is stopped — so the cleanup can simply
+     * never happen. onStopped runs immediately, on the main thread, at the one
+     * moment the framework guarantees to tell us the work is over.
+     */
+    @Override
+    public void onStopped() {
+        super.onStopped();
+        new ScanNotifier(getApplicationContext()).clearProgress();
+    }
+
+    /** The stage, in the words the notification shows. */
+    private static String stageText(Context context, ScanProgress.Stage stage) {
+        switch (stage) {
+            case FOLLOWING:
+                return context.getString(R.string.notify_stage_following);
+            case FOLLOWERS:
+                return context.getString(R.string.notify_stage_followers);
+            case SAVING:
+            default:
+                return context.getString(R.string.notify_stage_saving);
+        }
     }
 }

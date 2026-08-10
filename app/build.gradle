@@ -43,6 +43,10 @@ dependencies {
     implementation 'androidx.work:work-runtime:2.9.1'
     implementation 'androidx.core:core:1.13.1'
     implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    // Springs, not fixed-duration animators: a press that can be released,
+    // re-pressed and reversed mid-flight has to animate from wherever the view
+    // currently is, which is the one thing a duration-based animator cannot do.
+    implementation 'androidx.dynamicanimation:dynamicanimation:1.0.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.8.7'
     implementation 'com.google.android.material:material:1.12.0'
 

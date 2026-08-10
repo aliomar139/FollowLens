@@ -24,21 +24,35 @@ public final class ScanScheduler {
     private static final String PERIODIC_NAME = "followlens-periodic-scan";
     private static final String MANUAL_NAME = "followlens-manual-scan";
 
-    /** 15 minutes is PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS. */
-    private static final long INTERVAL_MINUTES = 15;
+    /**
+     * Once a day.
+     *
+     * The floor WorkManager allows is 15 minutes, and that is what this used to
+     * be, but the frequency was set by the platform's minimum rather than by
+     * what the data does: follows and unfollows are not a per-quarter-hour
+     * event, and every scan walks both lists in full against an endpoint that
+     * throttles. A day's resolution answers the same questions at a
+     * ninety-sixth of the requests, and Refresh is still there for right now.
+     */
+    private static final long INTERVAL_HOURS = 24;
 
     private ScanScheduler() {
     }
 
     public static void schedulePeriodic(Context context) {
         PeriodicWorkRequest request = new PeriodicWorkRequest.Builder(
-                ScanWorker.class, INTERVAL_MINUTES, TimeUnit.MINUTES)
+                ScanWorker.class, INTERVAL_HOURS, TimeUnit.HOURS)
                 .setConstraints(networkRequired())
                 .addTag(ScanWorker.TAG)
                 .build();
 
+        // UPDATE, not KEEP. KEEP means "leave whatever is already scheduled
+        // alone", so an app that had already registered the old fifteen-minute
+        // schedule would go on running it forever and this change would reach
+        // only fresh installs. UPDATE re-times the existing work in place,
+        // keeping its identity so no scan is lost in the swap.
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-                PERIODIC_NAME, ExistingPeriodicWorkPolicy.KEEP, request);
+                PERIODIC_NAME, ExistingPeriodicWorkPolicy.UPDATE, request);
     }
 
     /**
