@@ -63,7 +63,7 @@ to a 10 minute cooldown to stay well inside Instagram's rate limits.
 
 | | |
 |---|---|
-| JDK | 17 or newer to run Gradle. Java 17 is the source and target level. |
+| JDK | 17 or newer. Java 17 is the source and target level; the suite is verified on 21 and 25. |
 | Android SDK | `compileSdk` / `targetSdk` 35, `minSdk` 26 (Android 8.0) |
 | Gradle | 8.9 via the included wrapper, with Android Gradle Plugin 8.7.3 |
 
@@ -85,6 +85,10 @@ org.gradle.java.home=C\:\\Program Files\\Android\\Android Studio\\jbr
 > `org.gradle.java.home` has no effect in `local.properties`. Android Studio reads
 > that file, but Gradle itself does not; on the command line the setting is silently
 > ignored.
+>
+> Gradle 8.9 officially supports up to Java 22. Newer JDKs build and test cleanly
+> here, but they are outside the range Gradle guarantees, so a JDK in the 17 to 22
+> window is the safer choice for a reproducible build.
 
 **Tasks**
 
