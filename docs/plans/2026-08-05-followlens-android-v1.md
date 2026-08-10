@@ -1,6 +1,6 @@
 # FollowLens Android v1 Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** A pure-Java Android app that scans the signed-in Instagram account's followers and following lists on a 15-minute schedule, diffs each scan against the last, and notifies the user when someone unfollows.
 

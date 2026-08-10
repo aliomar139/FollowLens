@@ -59,11 +59,10 @@ icons/       # launcher icon sources used to generate the mipmaps
 
 ## Credits
 
-This is a Java port of the Instagram web client from
-[kira/follow-lens](https://github.com/kira/follow-lens), a Python/Flask
-project by kira. The Android app is standalone — it does not talk to that
-server.
+The Instagram web client here is a Java port of the one from `follow-lens`, an
+earlier Python/Flask project of mine. The Android app is standalone — it does not
+talk to that server.
 
 ## License
 
-Released under the [MIT License](LICENSE). © aliomar139, © kira
+Released under the [MIT License](LICENSE). © aliomar139
